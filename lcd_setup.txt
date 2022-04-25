@@ -1,0 +1,40 @@
+Setup for display controller
+
+Please read the datasheet carefully and look at the timing diagrams.
+
+Note the various values for time delays - one of them is zero!
+
+On Power up:        Wait 50 ms
+Init sequence:
+    Send 00111000   Wait 60 us 8 bits, 2lines, 5x8 dots (no busy flag available)
+    Send 00111000   Wait 60 us 8 bits, 2lines, 5x8 dots busy flag available from now on
+    Send 00111000   Wait 60 us 8 bits, 2lines, 5x8 dots 
+    Send 00001100   Wait 60 us Display ON, no cursor, no blink
+    Send 00000001   Wait 2 ms  Clear display (note the long delay)
+    Send 00000110   Wait 60 us  Entry mode set with increment
+    Send 10000000   Wait 60 Set cursor position (Top left in this case)
+
+You can now use the values of RS and R/W to locate the cursor and write values to the DDRAM
+
+There are several variations of datasheets out on the internet and some have different 
+init sequences, the sequence above seems to work for the Winstar 2 x 16 LCD that we
+are using. There is one that details the Hitachi HD44780 and this explains the working
+in much more detail. Where there are differences - use the Winstar data.
+
+The LCD is a very slow device compared to the Nucleo board and the FPGA. If the timings 
+are wrong it tends to sulk and not display anything.
+
+The delay used in Modelsim (e.g. #10 ps) is for simulation only it won't work in Quartus.
+
+Use timers or simply count clock cycles, the clock is running at 50 MHz.
+
+Here is the table for using RS and R/W
+
+    RS      R/W
+-----------------
+    0        0      Write to Instruction Register - send a command
+    0        1      Read busy flag on DB7 
+    1        0      Write data to DDRAM or CGRAM - this is what is displayed
+    1        1      Read data from DDRAM or CGRAM
+
+
