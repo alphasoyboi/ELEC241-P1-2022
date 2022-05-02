@@ -1,4 +1,4 @@
-module angle_tracking_unit #(parameter N = 12'b000000000000) (output logic [11:0] angle, input logic hall_1, hall_2, reset, monitor, clockwise);
+module angle_tracking_unit #(parameter N = 12'd0) (output logic [11:0] angle, input logic hall_1, hall_2, reset, monitor, clockwise);
 
 logic [11:0] starter = N;
 logic [11:0] data;
@@ -10,11 +10,11 @@ assign #(10ps) angle = data;
 //also holds reset code
 always_ff @(posedge hall_1, negedge reset) begin
 	if(reset == 1'b0)
-		starter = 12'b000000000000;
+		starter = 12'd0;
 	else if(clockwise == 1'b1) begin
 		if(hall_2 == 1'b1) begin
-			data = starter + //placeholder
-			starter = data
+			data = starter + 12'd4;
+			starter = data;
 		end
 	end
 end
@@ -23,8 +23,8 @@ end
 always_ff @(posedge hall_2) begin
 	if(clockwise == 1'b0) begin
 		if(hall_1 == 1'b1) begin
-			data = starter - //placeholder
-			starter = data
+			data = starter - 12'd4;
+			starter = data;
 		end
 	end
 end
