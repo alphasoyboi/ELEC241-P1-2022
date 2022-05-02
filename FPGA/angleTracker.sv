@@ -12,14 +12,20 @@ always_ff @(posedge hall_1, negedge reset) begin
 	if(reset == 1'b0)
 		starter = 12'b000000000000;
 	else if(clockwise == 1'b1) begin
-
+		if(hall_2 == 1'b1) begin
+			data = starter + //placeholder
+			starter = data
+		end
 	end
 end
 
 //runs when hall 2 goes high, checks for anticlockwise
 always_ff @(posedge hall_2) begin
 	if(clockwise == 1'b0) begin
-
+		if(hall_1 == 1'b1) begin
+			data = starter - //placeholder
+			starter = data
+		end
 	end
 end
 
