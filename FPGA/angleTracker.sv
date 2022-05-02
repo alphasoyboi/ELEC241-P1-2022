@@ -14,6 +14,9 @@ always_ff @(posedge hall_1, negedge reset) begin
 	else if(clockwise == 1'b1) begin
 		if(hall_2 == 1'b1) begin
 			data = starter + 12'd4;
+			//overflow calculator. 4024 is the largest multiple of 1006 in 12 bits
+			if(data == 12'd4024)
+				data = 12'd0;
 			starter = data;
 		end
 	end
@@ -23,7 +26,11 @@ end
 always_ff @(posedge hall_2) begin
 	if(clockwise == 1'b0) begin
 		if(hall_1 == 1'b1) begin
-			data = starter - 12'd4;
+			//reverse overflow calculator
+			if(starter == 0)
+				data = 12'd4020;
+			else
+				data = starter - 12'd4;
 			starter = data;
 		end
 	end
