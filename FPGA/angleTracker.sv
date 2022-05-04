@@ -6,13 +6,13 @@ logic [11:0] data;
 //delay is for testing purposes, should be removed once complete
 assign #(10ps) angle = data;
 
-//runs when hall 1 goes high, checks for clockwise
+//runs when hall 2 goes high, checks for clockwise
 //also holds reset code
-always_ff @(posedge hall_1, negedge reset) begin
+always_ff @(posedge hall_2, negedge reset) begin
 	if(reset == 1'b0)
 		starter = 12'd0;
-	else if(clockwise == 1'b1) begin
-		if(hall_2 == 1'b1) begin
+	else if(clockwise == 1'b1 && monitor == 1'b1) begin
+		if(hall_1 == 1'b1) begin
 			data = starter + 12'd4;
 			//overflow calculator. 4024 is the largest multiple of 1006 in 12 bits
 			if(data == 12'd4024)
@@ -22,10 +22,10 @@ always_ff @(posedge hall_1, negedge reset) begin
 	end
 end
 
-//runs when hall 2 goes high, checks for anticlockwise
-always_ff @(posedge hall_2) begin
+//runs when hall 1 goes high, checks for anticlockwise
+always_ff @(posedge hall_1) begin
 	if(clockwise == 1'b0) begin
-		if(hall_1 == 1'b1) begin
+		if(hall_2 == 1'b1 && monitor == 1'b1) begin
 			//reverse overflow calculator
 			if(starter == 0)
 				data = 12'd4020;
