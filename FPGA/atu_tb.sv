@@ -8,4 +8,6 @@ logic [11:0] angle;
 //instantiate ATU
 angle_tracking_unit u1(angle, hall_1, hall_2, reset, monitor, clockwise);
 
+always #50ps CLK = ~CLK;
+
 endmodule
