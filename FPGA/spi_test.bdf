@@ -899,63 +899,6 @@ https://fpgasoftware.intel.com/eula.
 	)
 )
 (symbol
-	(rect -272 808 -72 920)
-	(text "display_controller" (rect 5 0 91 12)(font "Arial" ))
-	(text "inst7" (rect 8 96 30 113)(font "Intel Clear" ))
-	(port
-		(pt 0 32)
-		(input)
-		(text "ascii_data[7..0]" (rect 0 0 75 12)(font "Arial" ))
-		(text "ascii_data[7..0]" (rect 21 27 96 39)(font "Arial" ))
-		(line (pt 0 32)(pt 16 32)(line_width 3))
-	)
-	(port
-		(pt 0 48)
-		(input)
-		(text "write" (rect 0 0 22 12)(font "Arial" ))
-		(text "write" (rect 21 43 43 55)(font "Arial" ))
-		(line (pt 0 48)(pt 16 48))
-	)
-	(port
-		(pt 0 64)
-		(input)
-		(text "clk" (rect 0 0 14 12)(font "Arial" ))
-		(text "clk" (rect 21 59 35 71)(font "Arial" ))
-		(line (pt 0 64)(pt 16 64))
-	)
-	(port
-		(pt 200 32)
-		(output)
-		(text "data[7..0]" (rect 0 0 47 12)(font "Arial" ))
-		(text "data[7..0]" (rect 140 27 187 39)(font "Arial" ))
-		(line (pt 200 32)(pt 184 32)(line_width 3))
-	)
-	(port
-		(pt 200 48)
-		(output)
-		(text "rs" (rect 0 0 9 12)(font "Arial" ))
-		(text "rs" (rect 172 43 181 55)(font "Arial" ))
-		(line (pt 200 48)(pt 184 48))
-	)
-	(port
-		(pt 200 64)
-		(output)
-		(text "rw" (rect 0 0 10 12)(font "Arial" ))
-		(text "rw" (rect 171 59 181 71)(font "Arial" ))
-		(line (pt 200 64)(pt 184 64))
-	)
-	(port
-		(pt 200 80)
-		(output)
-		(text "e" (rect 0 0 5 12)(font "Arial" ))
-		(text "e" (rect 175 75 180 87)(font "Arial" ))
-		(line (pt 200 80)(pt 184 80))
-	)
-	(drawing
-		(rectangle (rect 16 16 184 96))
-	)
-)
-(symbol
 	(rect 704 800 864 912)
 	(text "led_reg_controller" (rect 5 0 91 12)(font "Arial" ))
 	(text "inst4" (rect 8 96 30 113)(font "Intel Clear" ))
@@ -1111,6 +1054,113 @@ https://fpgasoftware.intel.com/eula.
 	(drawing
 		(rectangle (rect 16 16 120 80))
 	)
+)
+(symbol
+	(rect -272 808 -72 952)
+	(text "display_controller" (rect 5 0 91 12)(font "Arial" ))
+	(text "inst7" (rect 8 128 31 140)(font "Arial" ))
+	(port
+		(pt 0 32)
+		(input)
+		(text "ascii_data[7..0]" (rect 0 0 75 12)(font "Arial" ))
+		(text "ascii_data[7..0]" (rect 21 27 96 39)(font "Arial" ))
+		(line (pt 0 32)(pt 16 32)(line_width 3))
+	)
+	(port
+		(pt 0 48)
+		(input)
+		(text "write" (rect 0 0 22 12)(font "Arial" ))
+		(text "write" (rect 21 43 43 55)(font "Arial" ))
+		(line (pt 0 48)(pt 16 48))
+	)
+	(port
+		(pt 0 64)
+		(input)
+		(text "clk" (rect 0 0 14 12)(font "Arial" ))
+		(text "clk" (rect 21 59 35 71)(font "Arial" ))
+		(line (pt 0 64)(pt 16 64))
+	)
+	(port
+		(pt 0 80)
+		(input)
+		(text "reset" (rect 0 0 24 12)(font "Arial" ))
+		(text "reset" (rect 21 75 45 87)(font "Arial" ))
+		(line (pt 0 80)(pt 16 80))
+	)
+	(port
+		(pt 200 32)
+		(output)
+		(text "data[7..0]" (rect 0 0 47 12)(font "Arial" ))
+		(text "data[7..0]" (rect 140 27 179 39)(font "Arial" ))
+		(line (pt 200 32)(pt 184 32)(line_width 3))
+	)
+	(port
+		(pt 200 48)
+		(output)
+		(text "rs" (rect 0 0 9 12)(font "Arial" ))
+		(text "rs" (rect 172 43 179 55)(font "Arial" ))
+		(line (pt 200 48)(pt 184 48))
+	)
+	(port
+		(pt 200 64)
+		(output)
+		(text "rw" (rect 0 0 10 12)(font "Arial" ))
+		(text "rw" (rect 171 59 179 71)(font "Arial" ))
+		(line (pt 200 64)(pt 184 64))
+	)
+	(port
+		(pt 200 80)
+		(output)
+		(text "e" (rect 0 0 5 12)(font "Arial" ))
+		(text "e" (rect 175 75 179 87)(font "Arial" ))
+		(line (pt 200 80)(pt 184 80))
+	)
+	(port
+		(pt 200 96)
+		(output)
+		(text "busy" (rect 0 0 24 12)(font "Arial" ))
+		(text "busy" (rect 159 91 179 103)(font "Arial" ))
+		(line (pt 200 96)(pt 184 96))
+	)
+	(parameter
+		"t_41000us"
+		"00000000000111110100011111010000"
+		""
+		(type "PARAMETER_UNSIGNED_BIN")	)
+	(parameter
+		"t_154us"
+		"00000000000000010010110011001000"
+		""
+		(type "PARAMETER_UNSIGNED_BIN")	)
+	(parameter
+		"t_40us"
+		"00000000000000000000011111010000"
+		""
+		(type "PARAMETER_UNSIGNED_BIN")	)
+	(parameter
+		"t_1200ns"
+		"00000000000000000000000000111100"
+		""
+		(type "PARAMETER_UNSIGNED_BIN")	)
+	(parameter
+		"t_140ns"
+		"00000000000000000000000000000111"
+		""
+		(type "PARAMETER_UNSIGNED_BIN")	)
+	(parameter
+		"t_100ns"
+		"00000000000000000000000000000101"
+		""
+		(type "PARAMETER_UNSIGNED_BIN")	)
+	(parameter
+		"t_38us"
+		"00000000000000000000011101101100"
+		""
+		(type "PARAMETER_UNSIGNED_BIN")	)
+	(drawing
+		(rectangle (rect 16 16 184 128))
+	)
+	(annotation_block (parameter)(rect -384 648 0 800))
 )
 (connector
 	(pt 1208 320)
@@ -1473,6 +1523,11 @@ https://fpgasoftware.intel.com/eula.
 	(pt 120 632)
 	(pt 144 632)
 )
+(connector
+	(text "areset" (rect -326 872 -297 889)(font "Intel Clear" ))
+	(pt -272 888)
+	(pt -336 888)
+)
 (junction (pt 680 696))
 (junction (pt 664 728))
 (junction (pt 104 520))
@@ -1485,8 +1540,8 @@ https://fpgasoftware.intel.com/eula.
 (text "Write to data_tx when busy_tx falls" (rect 592 368 799 387)(font "Intel Clear" (font_size 8)))
 (text "Read data_rx when busy_rx falls" (rect 592 384 783 403)(font "Intel Clear" (font_size 8)))
 (text "Use a statemachine to monitor these two signals" (rect 592 400 876 419)(font "Intel Clear" (font_size 8)))
-(text "IMPORTANT - OPTOA and OPTOB pins are configured to have weak pull-up circuitry. " (rect -440 656 63 675)(font "Intel Clear" (font_size 8)))
-(text "See the pin planner for details." (rect -440 688 -259 707)(font "Intel Clear" (font_size 8)))
+(text "IMPORTANT - OPTOA and OPTOB pins are configured to have weak pull-up circuitry. " (rect -440 592 63 611)(font "Intel Clear" (font_size 8)))
+(text "See the pin planner for details." (rect -440 616 -259 635)(font "Intel Clear" (font_size 8)))
 (line (pt 552 240)(pt 1824 240)(color 85 85 255)(dashed)(line_width 2))
 (rectangle (rect 552 8 1824 552)(color 85 85 255)(line_width 2))
 (rectangle (rect -464 104 504 1000)(color 0 0 255)(line_width 2))
