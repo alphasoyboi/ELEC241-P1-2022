@@ -89,17 +89,17 @@ https://fpgasoftware.intel.com/eula.
 	)
 	(parameter
 		"t_41000us"
-		"00000000000111110100011111010000"
+		"00000000000111101000010010000000"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
 		"t_154us"
-		"00000000000000010010110011001000"
+		"00000000000000010010101011010100"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
 		"t_40us"
-		"00000000000000000000011111010000"
+		"00000000000000000000011110011110"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
@@ -110,11 +110,6 @@ https://fpgasoftware.intel.com/eula.
 	(parameter
 		"t_140ns"
 		"00000000000000000000000000000111"
-		""
-		(type "PARAMETER_UNSIGNED_BIN")	)
-	(parameter
-		"t_100ns"
-		"00000000000000000000000000000101"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(drawing
