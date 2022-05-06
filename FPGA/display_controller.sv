@@ -2,8 +2,8 @@ module display_controller #(
     // delays in clock pulses
     parameter int unsigned t_40000us = 2000000, // delay for vcc rise
     parameter int unsigned t_1530us  = 76500,   // delay for display clear
+    parameter int unsigned t_43us    = 2150,    // 
     parameter int unsigned t_39us    = 1950,    // delay for most other commands
-    parameter int unsigned t_1200ns  = 60,      // write delay for enable cycle
     parameter int unsigned t_140ns   = 7        // write delay for enable pulse width
 )   (
     output logic [7:0] data,
@@ -11,7 +11,7 @@ module display_controller #(
     output logic rw,
     output logic e,
     output logic busy,
-    input logic [7:0] ascii_data,
+    input logic [11:0] angle_data,
     input logic write,
     input logic clk,
     input logic reset
@@ -63,8 +63,20 @@ module display_controller #(
         endcase
     endfunction
 
+    function bit send_ascii (bit [7:0] ascii, int unsigned clk_cnt);
+        if (clk_cnt < t_140ns)
+            {e, rs, rw, data} = {3'b110, ascii}; // pulse enable high, set register read/write controls, and write data to bus
+        else 
+            e = 0; // write lcd enable low after required pulse time (140ns)
+        if (clk_cnt >= t_43us)
+            return 1'b1;
+        else
+            return 1'b0;
+    endfunction
+
     disp_state_t disp_state;
     int unsigned clk_cnt;
+    bit [7:0] angle_ascii [4];
 
     always_ff @(posedge clk or negedge reset) begin
         if (~reset) begin
@@ -121,8 +133,19 @@ module display_controller #(
                         busy <= 1'b0;
                     end
                 end
-                STATE_READY: disp_state <= STATE_BUSY;
-                STATE_BUSY: disp_state <= STATE_READY;
+                STATE_READY: begin
+                    clk_cnt <= 0;
+                    busy <= 1'b1;
+                    disp_state <= STATE_BUSY;
+                end
+                STATE_BUSY: begin
+
+                    if (send_ascii(8'b1101_1111, clk_cnt)) begin
+                        clk_cnt <= 0;
+                        busy <= 1'b0;
+                        disp_state <= STATE_READY;
+                    end
+                end
             endcase
         end
     end

@@ -27,8 +27,8 @@ https://fpgasoftware.intel.com/eula.
 	(port
 		(pt 0 32)
 		(input)
-		(text "ascii_data[7..0]" (rect 0 0 59 12)(font "Arial" ))
-		(text "ascii_data[7..0]" (rect 21 27 80 39)(font "Arial" ))
+		(text "angle_data[11..0]" (rect 0 0 64 12)(font "Arial" ))
+		(text "angle_data[11..0]" (rect 21 27 85 39)(font "Arial" ))
 		(line (pt 0 32)(pt 16 32)(line_width 3))
 	)
 	(port
@@ -88,23 +88,23 @@ https://fpgasoftware.intel.com/eula.
 		(line (pt 200 96)(pt 184 96)(line_width 1))
 	)
 	(parameter
-		"t_41000us"
+		"t_40000us"
 		"00000000000111101000010010000000"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
-		"t_154us"
+		"t_1530us"
 		"00000000000000010010101011010100"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
-		"t_40us"
-		"00000000000000000000011110011110"
+		"t_43us"
+		"00000000000000000000100001100110"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
-		"t_1200ns"
-		"00000000000000000000000000111100"
+		"t_39us"
+		"00000000000000000000011110011110"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
