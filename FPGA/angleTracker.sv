@@ -1,7 +1,7 @@
 module angle_tracking_unit #(parameter N = 12'd0) (output logic [11:0] angle, input logic hall_1, hall_2, reset, monitor, clockwise);
 
 logic [11:0] starter = N;
-logic [11:0] data;
+logic [11:0] data = N;
 
 //delay is for testing purposes, should be removed once complete
 assign #(10ps) angle = data;
