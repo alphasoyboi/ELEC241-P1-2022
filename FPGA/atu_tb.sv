@@ -65,12 +65,12 @@ initial begin
 	#11ps assert(angle == 12'd0) $display("Overflow PASS"); else $error("Overflow FAIL");
 	clockwise = 0;
 	@(posedge hall_1);
-	#11ps assert(angle == 12'd1005) $display("Reverse Overflow PASS"); else $error("Reverse Overflow FAIL");
+	#11ps assert(angle == 12'd4020) $display("Reverse Overflow PASS"); else $error("Reverse Overflow FAIL");
 
 	//loop to check ATU works for full anticlockwise range
 	passes = 10'd0;
 	for(int i = 1005; i > 0; i--) begin
-		@(posedge hall_2);
+		@(posedge hall_1);
 		#11ps 
 		//if(angle == (i*4))
 			passes++;
