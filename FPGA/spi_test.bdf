@@ -1128,8 +1128,23 @@ https://fpgasoftware.intel.com/eula.
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
+		"t_15000us"
+		"00000000000111101000010010000000"
+		""
+		(type "PARAMETER_UNSIGNED_BIN")	)
+	(parameter
+		"t_4100us"
+		"00000000000000110010000011001000"
+		""
+		(type "PARAMETER_UNSIGNED_BIN")	)
+	(parameter
 		"t_1530us"
 		"00000000000000010010101011010100"
+		""
+		(type "PARAMETER_UNSIGNED_BIN")	)
+	(parameter
+		"t_100us"
+		"00000000000000000001001110001000"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
@@ -1143,8 +1158,28 @@ https://fpgasoftware.intel.com/eula.
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
+		"t_200ns"
+		"00000000000000000000000000001010"
+		""
+		(type "PARAMETER_UNSIGNED_BIN")	)
+	(parameter
 		"t_140ns"
 		"00000000000000000000000000000111"
+		""
+		(type "PARAMETER_UNSIGNED_BIN")	)
+	(parameter
+		"t_41000us"
+		"00000000000111110100011111010000"
+		""
+		(type "PARAMETER_UNSIGNED_BIN")	)
+	(parameter
+		"t_154us"
+		"00000000000000010010110011001000"
+		""
+		(type "PARAMETER_UNSIGNED_BIN")	)
+	(parameter
+		"t_40us"
+		"00000000000000000000011111010000"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
@@ -1152,10 +1187,20 @@ https://fpgasoftware.intel.com/eula.
 		"00000000000000000000000000111100"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
+	(parameter
+		"t_100ns"
+		"00000000000000000000000000000101"
+		""
+		(type "PARAMETER_UNSIGNED_BIN")	)
+	(parameter
+		"t_38us"
+		"00000000000000000000011101101100"
+		""
+		(type "PARAMETER_UNSIGNED_BIN")	)
 	(drawing
 		(rectangle (rect 16 16 184 128))
 	)
-	(annotation_block (parameter)(rect -384 664 0 800))
+	(annotation_block (parameter)(rect -384 648 0 800))
 )
 (connector
 	(pt 1208 320)
