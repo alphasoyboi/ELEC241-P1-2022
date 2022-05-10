@@ -1056,14 +1056,14 @@ https://fpgasoftware.intel.com/eula.
 	)
 )
 (symbol
-	(rect -272 808 -72 952)
+	(rect -256 808 -72 952)
 	(text "display_controller" (rect 5 0 91 12)(font "Arial" ))
-	(text "inst7" (rect 8 128 31 140)(font "Arial" ))
+	(text "inst11" (rect 8 128 37 140)(font "Arial" ))
 	(port
 		(pt 0 32)
 		(input)
-		(text "angle_data[11..0]" (rect 0 0 84 12)(font "Arial" ))
-		(text "angle_data[11..0]" (rect 21 27 105 39)(font "Arial" ))
+		(text "angle[11..0]" (rect 0 0 57 12)(font "Arial" ))
+		(text "angle[11..0]" (rect 21 27 78 39)(font "Arial" ))
 		(line (pt 0 32)(pt 16 32)(line_width 3))
 	)
 	(port
@@ -1088,119 +1088,74 @@ https://fpgasoftware.intel.com/eula.
 		(line (pt 0 80)(pt 16 80))
 	)
 	(port
-		(pt 200 32)
+		(pt 184 32)
 		(output)
 		(text "data[7..0]" (rect 0 0 47 12)(font "Arial" ))
-		(text "data[7..0]" (rect 140 27 179 39)(font "Arial" ))
-		(line (pt 200 32)(pt 184 32)(line_width 3))
+		(text "data[7..0]" (rect 124 27 163 39)(font "Arial" ))
+		(line (pt 184 32)(pt 168 32)(line_width 3))
 	)
 	(port
-		(pt 200 48)
+		(pt 184 48)
 		(output)
 		(text "rs" (rect 0 0 9 12)(font "Arial" ))
-		(text "rs" (rect 172 43 179 55)(font "Arial" ))
-		(line (pt 200 48)(pt 184 48))
+		(text "rs" (rect 156 43 163 55)(font "Arial" ))
+		(line (pt 184 48)(pt 168 48))
 	)
 	(port
-		(pt 200 64)
+		(pt 184 64)
 		(output)
 		(text "rw" (rect 0 0 10 12)(font "Arial" ))
-		(text "rw" (rect 171 59 179 71)(font "Arial" ))
-		(line (pt 200 64)(pt 184 64))
+		(text "rw" (rect 155 59 163 71)(font "Arial" ))
+		(line (pt 184 64)(pt 168 64))
 	)
 	(port
-		(pt 200 80)
+		(pt 184 80)
 		(output)
 		(text "e" (rect 0 0 5 12)(font "Arial" ))
-		(text "e" (rect 175 75 179 87)(font "Arial" ))
-		(line (pt 200 80)(pt 184 80))
+		(text "e" (rect 159 75 163 87)(font "Arial" ))
+		(line (pt 184 80)(pt 168 80))
 	)
 	(port
-		(pt 200 96)
+		(pt 184 96)
 		(output)
 		(text "busy" (rect 0 0 24 12)(font "Arial" ))
-		(text "busy" (rect 159 91 179 103)(font "Arial" ))
-		(line (pt 200 96)(pt 184 96))
+		(text "busy" (rect 143 91 163 103)(font "Arial" ))
+		(line (pt 184 96)(pt 168 96))
 	)
 	(parameter
-		"t_40000us"
+		"cycles_40000us"
 		"00000000000111101000010010000000"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
-		"t_15000us"
-		"00000000000111101000010010000000"
-		""
-		(type "PARAMETER_UNSIGNED_BIN")	)
-	(parameter
-		"t_4100us"
-		"00000000000000110010000011001000"
-		""
-		(type "PARAMETER_UNSIGNED_BIN")	)
-	(parameter
-		"t_1530us"
+		"cycles_1530us"
 		"00000000000000010010101011010100"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
-		"t_100us"
-		"00000000000000000001001110001000"
-		""
-		(type "PARAMETER_UNSIGNED_BIN")	)
-	(parameter
-		"t_43us"
+		"cycles_43us"
 		"00000000000000000000100001100110"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
-		"t_39us"
+		"cycles_39us"
 		"00000000000000000000011110011110"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
-		"t_200ns"
-		"00000000000000000000000000001010"
+		"cycles_1060ns"
+		"00000000000000000000000000110101"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
-		"t_140ns"
+		"cycles_140ns"
 		"00000000000000000000000000000111"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
-	(parameter
-		"t_41000us"
-		"00000000000111110100011111010000"
-		""
-		(type "PARAMETER_UNSIGNED_BIN")	)
-	(parameter
-		"t_154us"
-		"00000000000000010010110011001000"
-		""
-		(type "PARAMETER_UNSIGNED_BIN")	)
-	(parameter
-		"t_40us"
-		"00000000000000000000011111010000"
-		""
-		(type "PARAMETER_UNSIGNED_BIN")	)
-	(parameter
-		"t_1200ns"
-		"00000000000000000000000000111100"
-		""
-		(type "PARAMETER_UNSIGNED_BIN")	)
-	(parameter
-		"t_100ns"
-		"00000000000000000000000000000101"
-		""
-		(type "PARAMETER_UNSIGNED_BIN")	)
-	(parameter
-		"t_38us"
-		"00000000000000000000011101101100"
-		""
-		(type "PARAMETER_UNSIGNED_BIN")	)
 	(drawing
-		(rectangle (rect 16 16 184 128))
+		(rectangle (rect 16 16 168 128))
 	)
-	(annotation_block (parameter)(rect -384 648 0 800))
+	(annotation_block (parameter)(rect -408 664 0 800))
 )
 (connector
 	(pt 1208 320)
@@ -1365,11 +1320,6 @@ https://fpgasoftware.intel.com/eula.
 	(text "lcd_data[7]" (rect 42 800 96 817)(font "Intel Clear" ))
 	(pt 32 816)
 	(pt 96 816)
-)
-(connector
-	(text "CLOCK_50" (rect -326 856 -273 873)(font "Intel Clear" ))
-	(pt -272 872)
-	(pt -336 872)
 )
 (connector
 	(text "lcd_data[7..0]" (rect -70 824 -6 841)(font "Intel Clear" ))
@@ -1564,9 +1514,14 @@ https://fpgasoftware.intel.com/eula.
 	(pt 144 632)
 )
 (connector
-	(text "areset" (rect -326 872 -297 889)(font "Intel Clear" ))
-	(pt -272 888)
-	(pt -336 888)
+	(text "CLOCK_50" (rect -310 856 -257 873)(font "Intel Clear" ))
+	(pt -256 872)
+	(pt -320 872)
+)
+(connector
+	(text "areset" (rect -310 872 -281 889)(font "Intel Clear" ))
+	(pt -256 888)
+	(pt -320 888)
 )
 (junction (pt 680 696))
 (junction (pt 664 728))

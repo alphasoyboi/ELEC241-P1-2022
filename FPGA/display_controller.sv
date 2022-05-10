@@ -1,393 +1,255 @@
 module display_controller #(
     // delays in clock pulses
-    parameter int unsigned t_40000us = 2000000, // delay for vcc rise
-    parameter int unsigned t_15000us = 2000000, // delay for vcc rise
-    parameter int unsigned t_4100us  = 205000,  //
-    parameter int unsigned t_1530us  = 78000,  // delay for display clear
-    parameter int unsigned t_100us   = 5000,
-    parameter int unsigned t_43us    = 2500,   // 
-    parameter int unsigned t_39us    = 2000,   // delay for most other commands
-    parameter int unsigned t_200ns   = 10,     // write delay for enable pulse width
-    parameter int unsigned t_140ns   = 10      // write delay for enable pulse width
+    parameter int unsigned cycles_40000us = 2000000, // delay for vcc rise
+    parameter int unsigned cycles_1530us  = 76500,   // delay for display clear
+    parameter int unsigned cycles_43us    = 2150,    // delay for data register write
+    parameter int unsigned cycles_39us    = 1950,    // delay for most instruction register writes
+    parameter int unsigned cycles_1060ns  = 53,      // write delay for enable pulse low
+    parameter int unsigned cycles_140ns   = 7        // write delay for enable pulse high
 )   (
     output logic [7:0] data,
     output logic rs,
     output logic rw,
     output logic e,
     output logic busy,
-    input logic [11:0] angle_data,
+    input logic [11:0] angle,
     input logic write,
     input logic clk,
     input logic reset
 );
 
+    typedef enum {
+        STATE_INIT_VCC_RISE = 1,
+        STATE_INIT_FUNC_SET_1,
+        STATE_INIT_FUNC_SET_2,
+        STATE_INIT_DISP_ON,
+        STATE_INIT_DISP_CLR,
+        STATE_INIT_ENTRY_MODE,
+        STATE_READY,
+        STATE_DISP_CLR, 
+        STATE_WRITE_DATA,
+        STATE_PAUSE
+    } state_t;
+
+    typedef enum {
+        CMD_STATE_READY = 1,
+        CMD_STATE_WRITE_IR, // write to instruction register
+        CMD_STATE_WRITE_DR, // wrtie to data register
+        CMD_STATE_HOLD,
+        CMD_STATE_DONE
+    } cmd_state_t;
+
     typedef enum bit [7:0] {
         CMD_CLR_DISP   = 8'b0000_0001, //
         CMD_RET_HOME   = 8'b0000_0010, //
         CMD_ENTRY_MODE = 8'b0000_0110, //
-        CMD_DISP_CTRL  = 8'b0000_1100, // turn display on, turn cursor and cursor blinking off
+        CMD_DISP_ON    = 8'b0000_1100, // turn display on, turn cursor and cursor blinking off
         CMD_FUNC_SET   = 8'b0011_1000  // set 8 bit mode, 2 line display, and 5x8 font
     } cmd_t;
 
-    typedef enum {
-        STATE_INIT_VCC_RISE,
-        STATE_INIT_SET_FUNC1,
-        STATE_INIT_SET_FUNC2,
-        STATE_INIT_SET_FUNC3,
-        STATE_INIT_DISP_ON,
-        STATE_INIT_DISP_CLR,
-        STATE_INIT_SET_ENTRY,
-        STATE_READY,
-        STATE_PAUSE,
-        STATE_DISP_CLR,
-        STATE_READ_DATA
-    } disp_state_t;
+    // timers
+    logic t1_done, t1_start; 
+    logic t2_done, t2_start; 
+    logic t3_done, t3_start; 
+    logic t4_done, t4_start; 
+    logic t5_done, t5_start;
+    logic t6_done, t6_start;
+    timer #(cycles_40000us) t1(t1_done, clk, t1_start, reset);
+    timer #(cycles_1530us)  t2(t2_done, clk, t2_start, reset);
+    timer #(cycles_43us)    t3(t3_done, clk, t3_start, reset);
+    timer #(cycles_39us)    t4(t4_done, clk, t4_start, reset);
+    timer #(cycles_1060ns)  t5(t5_done, clk, t5_start, reset);
+    timer #(cycles_140ns)   t6(t6_done, clk, t6_start, reset);
+    logic t7_done, t7_start;
+    timer #(50000000)   t7(t7_done, clk, t7_start, reset);
 
-    typedef enum {
-        CMD_STATE_WRITE,
-        CMD_STATE_HOLD,
-        CMD_STATE_DELAY
-    } cmd_state_t;
+    // angle converter
+    bit [11:0] bcd;
+    angle_to_bcd angle_data_converter(bcd, angle);
 
-    // this function returns a high bit once the specified command is complete
-    function bit send_cmd (cmd_t cmd, int unsigned clk_cnt);
-        if (clk_cnt < t_140ns)
-            {e, rs, rw, data} = {3'b100, cmd}; // pulse enable high, set register read/write controls, and write data to bus
-        else 
-            e = 0; // write lcd enable low after required pulse time (140ns)
-        case (cmd)
-            CMD_CLR_DISP, // fall through on case statement for commands with 1.53ms processing period
-            CMD_RET_HOME: begin
-                if (clk_cnt >= t_1530us)
-                    return 1'b1;
-                else
-                    return 1'b0;
+    cmd_t cmd;
+    cmd_state_t cmd_state, next_cmd_state;
+    state_t state, next_state;
+
+    bit [7:0] ascii [4];
+    int unsigned ascii_index;
+
+    always_latch begin : next_state_logic
+        case (cmd_state)
+            CMD_STATE_WRITE_IR,
+            CMD_STATE_WRITE_DR: begin
+                t6_start = 1;
+                if (t6_done) begin
+                    t6_start = 0;
+                    next_cmd_state = CMD_STATE_HOLD;
+                end
             end
-            CMD_ENTRY_MODE, // fall through on case statement for commands with 39us processing period
-            CMD_DISP_CTRL,
-            CMD_FUNC_SET: begin
-                if (clk_cnt >= t_43us)
-                    return 1'b1;
-                else
-                    return 1'b0;
+            CMD_STATE_HOLD: begin
+                t5_start = 1;
+                if (t5_done) begin
+                    t5_start = 0;
+                    next_cmd_state = CMD_STATE_DONE;
+                end
             end
-            default: return 1'b1;
+            default: next_cmd_state = CMD_STATE_READY;
         endcase
-    endfunction
 
-    function bit send_ascii (bit [7:0] ascii, int unsigned clk_cnt);
-        if (clk_cnt < t_140ns)
-            {e, rs, rw, data} = {3'b110, ascii}; // pulse enable high, set register read/write controls, and write data to bus
-        else 
-            e = 0; // write lcd enable low after required pulse time (140ns)
-        if (clk_cnt >= t_43us)
-            return 1'b1;
-        else
-            return 1'b0;
-    endfunction
+        // initialization sequence according to Winstar Display Co. for component WH1602B-NYG-JT
+        case (state)
+            STATE_INIT_VCC_RISE: begin
+                t1_start = 1;
+                if (t1_done) begin
+                    t1_start = 0;
 
-    bit [7:0] ascii_angle [4];
-    bit [7:0] ascii_angle2 [4];
-    int unsigned i;
-    int unsigned clk_cnt;
-    disp_state_t disp_state;
-    cmd_state_t  cmd_state;
+                    next_cmd_state = CMD_STATE_READY;
+                    next_state     = STATE_INIT_FUNC_SET_1;
+                end
+            end
+            STATE_INIT_FUNC_SET_1: begin
+                if (cmd_state == CMD_STATE_READY) begin
+                    cmd = CMD_FUNC_SET;
+                    next_cmd_state = CMD_STATE_WRITE_IR;
+                end
+                if (cmd_state == CMD_STATE_DONE) begin
+                    t4_start = 1;
+                    if (t4_done) begin
+                        t4_start = 0;
 
-    always_ff @(posedge clk or negedge reset) begin
+                        next_cmd_state = CMD_STATE_READY;
+                        next_state     = STATE_INIT_FUNC_SET_2;
+                    end
+                end
+            end
+            STATE_INIT_FUNC_SET_2: begin
+                if (cmd_state == CMD_STATE_READY) begin
+                    cmd = CMD_FUNC_SET;
+                    next_cmd_state = CMD_STATE_WRITE_IR;
+                end
+                if (cmd_state == CMD_STATE_DONE) begin
+                    t4_start = 1;
+                    if (t4_done) begin
+                        t4_start = 0;
+
+                        next_cmd_state = CMD_STATE_READY;
+                        next_state     = STATE_INIT_DISP_ON;
+                    end
+                end
+            end
+            STATE_INIT_DISP_ON: begin
+                if (cmd_state == CMD_STATE_READY) begin
+                    cmd = CMD_DISP_ON;
+                    next_cmd_state = CMD_STATE_WRITE_IR;
+                end
+                if (cmd_state == CMD_STATE_DONE) begin
+                    t4_start = 1;
+                    if (t4_done) begin
+                        t4_start = 0;
+
+                        next_cmd_state = CMD_STATE_READY;
+                        next_state     = STATE_INIT_DISP_CLR;
+                    end
+                end
+            end
+            STATE_INIT_DISP_CLR: begin
+                if (cmd_state == CMD_STATE_READY) begin
+                    cmd = CMD_CLR_DISP;
+                    next_cmd_state = CMD_STATE_WRITE_IR;
+                end
+                if (cmd_state == CMD_STATE_DONE) begin
+                    t2_start = 1;
+                    if (t2_done) begin
+                        t2_start = 0;
+
+                        next_cmd_state = CMD_STATE_READY;
+                        next_state     = STATE_INIT_ENTRY_MODE;
+                    end
+                end
+            end
+            STATE_INIT_ENTRY_MODE: begin
+                if (cmd_state == CMD_STATE_READY) begin
+                    cmd = CMD_ENTRY_MODE;
+                    next_cmd_state = CMD_STATE_WRITE_IR;
+                end
+                if (cmd_state == CMD_STATE_DONE) begin
+                    t4_start = 1;
+                    if (t4_done) begin
+                        t4_start = 0;
+
+                        next_cmd_state = CMD_STATE_READY;
+                        next_state     = STATE_DISP_CLR;
+                    end
+                end
+            end
+            STATE_READY: begin
+                if (write)
+                    next_state = STATE_DISP_CLR;
+            end
+            STATE_DISP_CLR: begin
+                if (cmd_state == CMD_STATE_READY) begin
+                    cmd = CMD_CLR_DISP;
+                    next_cmd_state = CMD_STATE_WRITE_IR;
+                end
+                if (cmd_state == CMD_STATE_DONE) begin
+                    t2_start = 1;
+                    if (t2_done) begin
+                        t2_start = 0;
+
+                        next_cmd_state = CMD_STATE_READY;
+                        next_state     = STATE_WRITE_DATA;
+                    end
+                end
+            end
+            STATE_WRITE_DATA: begin
+                if (cmd_state == CMD_STATE_READY) begin
+                    next_cmd_state = CMD_STATE_WRITE_DR;
+                end
+                if (cmd_state == CMD_STATE_DONE) begin
+                    t3_start = 1;
+                    if (t3_done) begin
+                        t3_start = 0;
+
+                        next_cmd_state = CMD_STATE_READY;
+                        next_state     = STATE_PAUSE;
+                    end
+                end
+            end
+            STATE_PAUSE: begin
+                t7_start = 1;
+                if (t7_done) begin
+                    t7_start = 0;
+
+                    next_state = STATE_READY;
+                end
+            end
+            default: next_state = STATE_INIT_VCC_RISE;
+        endcase
+    end
+
+    always_ff @(posedge clk or negedge reset) begin : update_state
         if (~reset) begin
-            // reset internal logic
-            i          <= 0;
-            clk_cnt    <= 0;
-            disp_state <= STATE_INIT_VCC_RISE;
-            ascii_angle[0] <= 8'b0011_0011;
-            ascii_angle[1] <= 8'b0011_0110;
-            ascii_angle[2] <= 8'b0011_0000;
-            ascii_angle[3] <= 8'b1101_1111;
+            ascii       <= '{8'b0011_0000, 8'b0011_0000, 8'b0011_0000, 8'b0011_0000};
+            ascii_index <= 0;
 
-            // set default state for module io
-            {e, rs, rw, data} <= 11'b0;
-            busy              <= 1'b1;
+            cmd_state <= CMD_STATE_READY;
+            state     <= STATE_INIT_VCC_RISE;
         end
         else begin
-            clk_cnt <= clk_cnt + 1; // increment count on clk posedge
-                
-            // initialization sequence according to Winstar Display Co. for component WH1602B-NYG-JT
-            // initialization sequence continues from STATE_INIT_VCC_RISE to STATE_INIT_SET_ENTRY
-            case (disp_state)
-                // waiting 40ms for vcc to rise to 4.5V and send first function set command
-                STATE_INIT_VCC_RISE: begin
-                    if (clk_cnt >= t_15000us) begin
-                        clk_cnt    <= 0;
-                        disp_state <= STATE_INIT_SET_FUNC1;
-                    end
-                end
-                // send second function set command (set 8 bit mode, 2 line, and 5x8 font)
-                STATE_INIT_SET_FUNC1: begin
-                    case (cmd_state)
-                        CMD_STATE_WRITE: begin
-                            {e, rs, rw, data} <= {3'b100, CMD_FUNC_SET};
-                            cmd_state         <= CMD_STATE_HOLD;
-                        end
-                        CMD_STATE_HOLD: begin
-                            if (clk_cnt >= t_200ns) begin
-                                e         <= 1'b0;
-                                cmd_state <= CMD_STATE_DELAY;
-                            end
-                        end
-                        CMD_STATE_DELAY: begin
-                            if (clk_cnt >= t_39us) begin
-                                clk_cnt    <= 0;
-                                disp_state <= STATE_INIT_SET_FUNC2;
-                                cmd_state <= CMD_STATE_WRITE;
-                            end
-                        end
-                    endcase
-                end
-                STATE_INIT_SET_FUNC2: begin
-                    case (cmd_state)
-                        CMD_STATE_WRITE: begin
-                            {e, rs, rw, data} <= {3'b100, CMD_FUNC_SET};
-                            cmd_state         <= CMD_STATE_HOLD;
-                        end
-                        CMD_STATE_HOLD: begin
-                            if (clk_cnt >= t_200ns) begin
-                                e         <= 1'b0;
-                                cmd_state <= CMD_STATE_DELAY;
-                            end
-                        end
-                        CMD_STATE_DELAY: begin
-                            if (clk_cnt >= t_39us) begin
-                                clk_cnt    <= 0;
-                                disp_state <= STATE_INIT_DISP_ON;
-                                cmd_state <= CMD_STATE_WRITE;
-                            end
-                        end
-                    endcase
-                end
-                // send command to enable display (and cursor appearance)
-                STATE_INIT_DISP_ON: begin
-                    case (cmd_state)
-                        CMD_STATE_WRITE: begin
-                            {e, rs, rw, data} <= {3'b100, CMD_DISP_CTRL};
-                            cmd_state         <= CMD_STATE_HOLD;
-                        end
-                        CMD_STATE_HOLD: begin
-                            if (clk_cnt >= t_200ns) begin
-                                e         <= 1'b0;
-                                cmd_state <= CMD_STATE_DELAY;
-                            end
-                        end
-                        CMD_STATE_DELAY: begin
-                            if (clk_cnt >= t_39us) begin
-                                clk_cnt    <= 0;
-                                disp_state <= STATE_INIT_DISP_CLR;
-                                cmd_state <= CMD_STATE_WRITE;
-                            end
-                        end
-                    endcase
-                end
-                // send command to clear display
-                STATE_INIT_DISP_CLR: begin
-                    case (cmd_state)
-                        CMD_STATE_WRITE: begin
-                            {e, rs, rw, data} <= {3'b100, CMD_CLR_DISP};
-                            cmd_state         <= CMD_STATE_HOLD;
-                        end
-                        CMD_STATE_HOLD: begin
-                            if (clk_cnt >= t_200ns) begin
-                                e         <= 1'b0;
-                                cmd_state <= CMD_STATE_DELAY;
-                            end
-                        end
-                        CMD_STATE_DELAY: begin
-                            if (clk_cnt >= t_39us) begin
-                                clk_cnt    <= 0;
-                                disp_state <= STATE_INIT_SET_ENTRY;
-                                cmd_state  <= CMD_STATE_WRITE;
-                            end
-                        end
-                    endcase
-                end
-                // send command to set entry mode (increment/decrement cursor and display shift on/off)
-                STATE_INIT_SET_ENTRY: begin
-                    case (cmd_state)
-                        CMD_STATE_WRITE: begin
-                            {e, rs, rw, data} <= {3'b100, CMD_ENTRY_MODE};
-                            cmd_state         <= CMD_STATE_HOLD;
-                        end
-                        CMD_STATE_HOLD: begin
-                            if (clk_cnt >= t_200ns) begin
-                                e         <= 1'b0;
-                                cmd_state <= CMD_STATE_DELAY;
-                            end
-                        end
-                        CMD_STATE_DELAY: begin
-                            if (clk_cnt >= t_39us) begin
-                                clk_cnt    <= 0;
-                                disp_state <= STATE_READY;
-                                cmd_state <= CMD_STATE_WRITE;
-                            end
-                        end
-                    endcase
-                end
-                STATE_READY: begin
-                    clk_cnt    <= 0;
-                    disp_state <= STATE_READ_DATA;
-                end
-                STATE_PAUSE: begin
-                    if (clk_cnt >= 50000000) begin
-                        clk_cnt    <= 0;
-                        disp_state <= STATE_DISP_CLR;
-                    end
-                end
-                STATE_DISP_CLR: begin
-                    case (cmd_state)
-                        CMD_STATE_WRITE: begin
-                            {e, rs, rw, data} <= {3'b100, CMD_CLR_DISP};
-                            cmd_state         <= CMD_STATE_HOLD;
-                        end
-                        CMD_STATE_HOLD: begin
-                            if (clk_cnt >= t_200ns) begin
-                                e         <= 1'b0;
-                                cmd_state <= CMD_STATE_DELAY;
-                            end
-                        end
-                        CMD_STATE_DELAY: begin
-                            if (clk_cnt >= t_1530us) begin
-                                i          <= 0;
-                                clk_cnt    <= 0;
-                                disp_state <= STATE_READY;
-                                cmd_state <= CMD_STATE_WRITE;
-                            end
-                        end
-                    endcase
-                end
-                STATE_READ_DATA: begin
-                    case (cmd_state)
-                        CMD_STATE_WRITE: begin
-                            {e, rs, rw, data} <= {3'b110, ascii_angle[i]};
-                            cmd_state         <= CMD_STATE_HOLD;
-                        end
-                        CMD_STATE_HOLD: begin
-                            if (clk_cnt >= t_200ns) begin
-                                e         <= 1'b0;
-                                cmd_state <= CMD_STATE_DELAY;
-                            end
-                        end
-                        CMD_STATE_DELAY: begin
-                            if (clk_cnt >= t_1530us) begin
-                                i          <= i + 1;
-                                clk_cnt    <= 0;
-                                cmd_state <= CMD_STATE_WRITE;
-                                if (i < 4)
-                                    disp_state <= STATE_READY;
-                                else
-                                    disp_state <= STATE_PAUSE;
-                            end
-                        end
-                    endcase
-                end
-            endcase
+            cmd_state <= next_cmd_state;
+            state     <= next_state;
         end
     end
 
+    always_latch begin : output_logic
+        case (cmd_state)
+            CMD_STATE_WRITE_IR: {e, rs, rw, data} = {3'b100, cmd};
+            CMD_STATE_WRITE_DR: {e, rs, rw, data} = {3'b110, ascii[ascii_index]};
+            default: e = 0;
+        endcase
+
+        if (state == STATE_READY) 
+            busy = 0;
+        else
+            busy = 1;
+    end
+
 endmodule
-/*
-
-            // initialization sequence according to Winstar Display Co. for component WH1602B-NYG-JT
-            // initialization sequence continues from STATE_INIT_VCC_RISE to STATE_INIT_SET_ENTRY
-            case (disp_state)
-                // waiting 40ms for vcc to rise to 4.5V and send first function set command
-                STATE_INIT_VCC_RISE: begin
-                    if (clk_cnt >= t_40000us) begin
-                        if (send_cmd(CMD_FUNC_SET, clk_cnt)) begin
-                            clk_cnt    <= 0;
-                            disp_state <= STATE_INIT_SET_FUNC1;
-                        end
-                    end
-                end
-                // send second function set command (set 8 bit mode, 2 line, and 5x8 font)
-                STATE_INIT_SET_FUNC1: begin
-                    if (send_cmd(CMD_FUNC_SET, clk_cnt)) begin
-                        clk_cnt    <= 0;
-                        disp_state <= STATE_INIT_SET_FUNC2;
-                    end
-                end
-                STATE_INIT_SET_FUNC2: begin
-
-                end
-                // send command to enable display (and cursor appearance)
-                STATE_INIT_DISP_ON: begin
-                    if (send_cmd(CMD_DISP_CTRL, clk_cnt)) begin
-                        clk_cnt    <= 0;
-                        disp_state <= STATE_INIT_DISP_CLR;
-                    end
-                end
-                // send command to clear display
-                STATE_INIT_DISP_CLR: begin
-                    if (send_cmd(CMD_CLR_DISP, clk_cnt)) begin
-                        clk_cnt    <= 0;
-                        disp_state <= STATE_INIT_SET_ENTRY;
-                    end
-                end
-                // send command to set entry mode (increment/decrement cursor and display shift on/off)
-                STATE_INIT_SET_ENTRY: begin
-                    if (send_cmd(CMD_ENTRY_MODE, clk_cnt)) begin
-                        clk_cnt    <= 0;
-                        disp_state <= STATE_READY;
-                    end
-                end
-                STATE_READY: begin
-                    if (clk_cnt >= 5000) begin
-                        clk_cnt    <= 0;
-                        disp_state <= STATE_READ_DATA;
-                    end
-                end
-                STATE_PAUSE: begin
-                    if (clk_cnt >= 50000000) begin
-                        clk_cnt    <= 0;
-                        disp_state <= STATE_DISP_CLR;
-                    end
-                end
-                STATE_PAUSE2: begin
-                    if (clk_cnt >= 50000000) begin
-                        clk_cnt    <= 0;
-                        disp_state <= STATE_DISP_CLR2;
-                    end
-                end
-                STATE_DISP_CLR: begin
-                    if (send_cmd(CMD_CLR_DISP, clk_cnt)) begin
-                        i          <= 0;
-                        clk_cnt    <= 0;
-                        disp_state <= STATE_READY;
-                    end
-                end
-                STATE_DISP_CLR2: begin
-                    if (send_cmd(CMD_CLR_DISP, clk_cnt)) begin
-                        i          <= 0;
-                        clk_cnt    <= 0;
-                        disp_state <= STATE_READY;
-                    end
-                end
-                STATE_READ_DATA: begin
-                    if (send_ascii(ascii_angle[i], clk_cnt)) begin
-                        i = i + 1;
-                        clk_cnt <= 0;
-                        disp_state <= STATE_READY;
-                        if (i == 4) begin
-                            disp_state <= STATE_PAUSE;
-                        end
-                    end
-                end
-                STATE_READ_DATA2: begin
-                    if (send_ascii(ascii_angle[i], clk_cnt)) begin
-                        i = i + 1;
-                        clk_cnt <= 0;
-                        disp_state <= STATE_READY;
-                        if (i == 4) begin
-                            disp_state <= STATE_PAUSE;
-                        end
-                    end
-                end
-            endcase
-            */

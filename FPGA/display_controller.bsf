@@ -21,14 +21,14 @@ https://fpgasoftware.intel.com/eula.
 */
 (header "symbol" (version "1.1"))
 (symbol
-	(rect 16 16 216 160)
+	(rect 16 16 200 160)
 	(text "display_controller" (rect 5 0 73 12)(font "Arial" ))
 	(text "inst" (rect 8 128 20 140)(font "Arial" ))
 	(port
 		(pt 0 32)
 		(input)
-		(text "angle_data[11..0]" (rect 0 0 64 12)(font "Arial" ))
-		(text "angle_data[11..0]" (rect 21 27 85 39)(font "Arial" ))
+		(text "angle[11..0]" (rect 0 0 42 12)(font "Arial" ))
+		(text "angle[11..0]" (rect 21 27 63 39)(font "Arial" ))
 		(line (pt 0 32)(pt 16 32)(line_width 3))
 	)
 	(port
@@ -53,87 +53,72 @@ https://fpgasoftware.intel.com/eula.
 		(line (pt 0 80)(pt 16 80)(line_width 1))
 	)
 	(port
-		(pt 200 32)
+		(pt 184 32)
 		(output)
 		(text "data[7..0]" (rect 0 0 36 12)(font "Arial" ))
-		(text "data[7..0]" (rect 143 27 179 39)(font "Arial" ))
-		(line (pt 200 32)(pt 184 32)(line_width 3))
+		(text "data[7..0]" (rect 127 27 163 39)(font "Arial" ))
+		(line (pt 184 32)(pt 168 32)(line_width 3))
 	)
 	(port
-		(pt 200 48)
+		(pt 184 48)
 		(output)
 		(text "rs" (rect 0 0 8 12)(font "Arial" ))
-		(text "rs" (rect 171 43 179 55)(font "Arial" ))
-		(line (pt 200 48)(pt 184 48)(line_width 1))
+		(text "rs" (rect 155 43 163 55)(font "Arial" ))
+		(line (pt 184 48)(pt 168 48)(line_width 1))
 	)
 	(port
-		(pt 200 64)
+		(pt 184 64)
 		(output)
 		(text "rw" (rect 0 0 9 12)(font "Arial" ))
-		(text "rw" (rect 170 59 179 71)(font "Arial" ))
-		(line (pt 200 64)(pt 184 64)(line_width 1))
+		(text "rw" (rect 154 59 163 71)(font "Arial" ))
+		(line (pt 184 64)(pt 168 64)(line_width 1))
 	)
 	(port
-		(pt 200 80)
+		(pt 184 80)
 		(output)
 		(text "e" (rect 0 0 4 12)(font "Arial" ))
-		(text "e" (rect 175 75 179 87)(font "Arial" ))
-		(line (pt 200 80)(pt 184 80)(line_width 1))
+		(text "e" (rect 159 75 163 87)(font "Arial" ))
+		(line (pt 184 80)(pt 168 80)(line_width 1))
 	)
 	(port
-		(pt 200 96)
+		(pt 184 96)
 		(output)
 		(text "busy" (rect 0 0 20 12)(font "Arial" ))
-		(text "busy" (rect 159 91 179 103)(font "Arial" ))
-		(line (pt 200 96)(pt 184 96)(line_width 1))
+		(text "busy" (rect 143 91 163 103)(font "Arial" ))
+		(line (pt 184 96)(pt 168 96)(line_width 1))
 	)
 	(parameter
-		"t_40000us"
+		"cycles_40000us"
 		"00000000000111101000010010000000"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
-		"t_15000us"
-		"00000000000111101000010010000000"
+		"cycles_1530us"
+		"00000000000000010010101011010100"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
-		"t_4100us"
-		"00000000000000110010000011001000"
+		"cycles_43us"
+		"00000000000000000000100001100110"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
-		"t_1530us"
-		"00000000000000010011000010110000"
+		"cycles_39us"
+		"00000000000000000000011110011110"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
-		"t_100us"
-		"00000000000000000001001110001000"
+		"cycles_1060ns"
+		"00000000000000000000000000110101"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
-		"t_43us"
-		"00000000000000000000100111000100"
-		""
-		(type "PARAMETER_UNSIGNED_BIN")	)
-	(parameter
-		"t_39us"
-		"00000000000000000000011111010000"
-		""
-		(type "PARAMETER_UNSIGNED_BIN")	)
-	(parameter
-		"t_200ns"
-		"00000000000000000000000000001010"
-		""
-		(type "PARAMETER_UNSIGNED_BIN")	)
-	(parameter
-		"t_140ns"
-		"00000000000000000000000000001010"
+		"cycles_140ns"
+		"00000000000000000000000000000111"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(drawing
-		(rectangle (rect 16 16 184 128)(line_width 1))
+		(rectangle (rect 16 16 168 128)(line_width 1))
 	)
-	(annotation_block (parameter)(rect 216 -64 316 16))
+	(annotation_block (parameter)(rect 200 -64 300 16))
 )
