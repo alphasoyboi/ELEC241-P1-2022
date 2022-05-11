@@ -4,7 +4,8 @@ logic [11:0] starter = N;
 logic [11:0] data = N;
 
 //delay is for testing purposes, should be removed once complete
-assign #(10ps) angle = data;
+//assign #(10ps) angle = data;
+assign angle = data;
 
 //runs when hall 2 goes high, checks for clockwise
 //also holds reset code
