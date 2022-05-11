@@ -39,11 +39,12 @@ module display_controller #(
     } cmd_state_t;
 
     typedef enum bit [7:0] {
+        CMD_NULL,
+        CMD_FUNC_SET   = 8'b0011_1000, // set 8 bit mode, 2 line display, and 5x8 font
+        CMD_DISP_ON    = 8'b0000_1100, // turn display on, turn cursor and cursor blinking off
         CMD_CLR_DISP   = 8'b0000_0001, //
         CMD_RET_HOME   = 8'b0000_0010, //
-        CMD_ENTRY_MODE = 8'b0000_0110, //
-        CMD_DISP_ON    = 8'b0000_1100, // turn display on, turn cursor and cursor blinking off
-        CMD_FUNC_SET   = 8'b0011_1000  // set 8 bit mode, 2 line display, and 5x8 font
+        CMD_ENTRY_MODE = 8'b0000_0110  //
     } cmd_t;
 
     // timers
@@ -82,23 +83,16 @@ module display_controller #(
         // initialization sequence according to Winstar Display Co. for component WH1602B-NYG-JT
         case (state)
             STATE_INIT_VCC_RISE: begin
-                t1_start = 1;
-                if (t1_done) begin
-                    t1_start = 0;
-                    next_cmd_state = CMD_STATE_READY;
-                    next_state     = STATE_INIT_FUNC_SET_1;
+                if (state_timer_done) begin
+                    next_state = STATE_INIT_FUNC_SET_1;
                 end
             end
             STATE_INIT_FUNC_SET_1: begin
                 if (cmd_state == CMD_STATE_READY) begin
                     cmd = CMD_FUNC_SET;
-                    next_cmd_state = CMD_STATE_WRITE_IR;
                 end
                 if (cmd_state == CMD_STATE_DONE) begin
-                    t4_start = 1;
-                    if (t4_done) begin
-                        t4_start = 0;
-                        next_cmd_state = CMD_STATE_READY;
+                    if (state_timer_done) begin
                         next_state     = STATE_INIT_FUNC_SET_2;
                     end
                 end
@@ -224,6 +218,10 @@ module display_controller #(
 
     always_comb begin : timer_logic
         case (cmd_state) 
+            CMD_STATE_WRITE_IR,
+            CMD_STATE_WRITE_DR: cmd_timer_start = 1;
+            default:            cmd_timer_start = 0;
+        endcase
 
         case (state)
             STATE_INIT_VCC_RISE:   timer_count = cycles_40000us;
