@@ -1,16 +1,14 @@
-module timer #(parameter int unsigned clk_cycles = 1)(output logic done, input logic clk, start, reset);
+module timer (output logic done, input int unsigned count, input logic clk, start, reset);
 
         typedef enum int unsigned { READY = 1, COUNTING, STOPPED } state_t;
 
         state_t state, next_state;
-        int unsigned count;
+        int unsigned cycles;
 
         always_comb begin : next_state_logic
-            //next_state = state;
-
             case (state) 
                 READY:    next_state = (start == 1) ? COUNTING : READY;
-                COUNTING: next_state = (count == clk_cycles) ? STOPPED : COUNTING;
+                COUNTING: next_state = (cycles == count) ? STOPPED : COUNTING;
                 STOPPED:  next_state = (start == 0) ? READY : STOPPED;
                 default:  next_state = READY;
             endcase
@@ -32,12 +30,12 @@ module timer #(parameter int unsigned clk_cycles = 1)(output logic done, input l
 
         always_ff @(posedge clk or negedge reset) begin : update_count
             if (~reset)
-                count <= 0;
+                cycles <= 0;
             else begin
                 if (state == COUNTING)
-                    count <= count + 1;
+                    cycles <= cycles + 1;
                 else
-                    count <= 0;
+                    cycles <= 0;
             end
         end
 
