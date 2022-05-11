@@ -18,7 +18,7 @@ module display_controller #(
     input logic reset
 );
 
-    typedef enum {
+    typedef enum int unsigned {
         STATE_INIT_VCC_RISE = 1,
         STATE_INIT_FUNC_SET_1,
         STATE_INIT_FUNC_SET_2,
@@ -31,11 +31,10 @@ module display_controller #(
         STATE_PAUSE
     } state_t;
 
-    typedef enum {
+    typedef enum int unsigned {
         CMD_STATE_READY = 1,
-        CMD_STATE_WRITE_IR, // write to instruction register
-        CMD_STATE_WRITE_DR, // wrtie to data register
-        CMD_STATE_HOLD,
+        CMD_STATE_WRITE_IR,  // write to instruction register
+        CMD_STATE_WRITE_DR,  // wrtie to data register
         CMD_STATE_DONE
     } cmd_state_t;
 
@@ -48,23 +47,15 @@ module display_controller #(
     } cmd_t;
 
     // timers
-    logic t1_done, t1_start; 
-    logic t2_done, t2_start; 
-    logic t3_done, t3_start; 
-    logic t4_done, t4_start; 
-    logic t5_done, t5_start;
-    logic t6_done, t6_start;
-    timer #(cycles_40000us) t1(t1_done, clk, t1_start, reset);
-    timer #(cycles_1530us)  t2(t2_done, clk, t2_start, reset);
-    timer #(cycles_43us)    t3(t3_done, clk, t3_start, reset);
-    timer #(cycles_39us)    t4(t4_done, clk, t4_start, reset);
-    timer #(cycles_1060ns)  t5(t5_done, clk, t5_start, reset);
-    timer #(cycles_140ns)   t6(t6_done, clk, t6_start, reset);
-    logic t7_done, t7_start;
-    timer #(50000000)   t7(t7_done, clk, t7_start, reset);
+    logic cmd_timer_done, state_timer_done;
+    logic cmd_timer_start, state_timer_start;
+    int unsigned cmd_timer_count, state_timer_count;
+    timer cmd_timer (cmd_timer_done, cmd_timer_count, clk, cmd_timer_start, reset);
+    timer state_timer (state_timer_done, state_timer_count, clk, state_timer_start, reset);
 
     // angle converter
     bit [11:0] bcd;
+    bit [11:0] bcd_temp;
     angle_to_bcd angle_data_converter(bcd, angle);
 
     cmd_t cmd;
@@ -74,33 +65,26 @@ module display_controller #(
     bit [7:0] ascii [4];
     int unsigned ascii_index;
 
-    always_latch begin : next_state_logic
+    always_comb begin : next_cmd_state_logic
         case (cmd_state)
+            CMD_STATE_READY:
             CMD_STATE_WRITE_IR,
             CMD_STATE_WRITE_DR: begin
-                t6_start = 1;
-                if (t6_done) begin
-                    t6_start = 0;
-                    next_cmd_state = CMD_STATE_HOLD;
-                end
-            end
-            CMD_STATE_HOLD: begin
-                t5_start = 1;
-                if (t5_done) begin
-                    t5_start = 0;
+                if (timer_done)
                     next_cmd_state = CMD_STATE_DONE;
-                end
             end
+            CMD_STATE_DONE:
             default: next_cmd_state = CMD_STATE_READY;
         endcase
+    end
 
+    always_latch begin : next_state_logic
         // initialization sequence according to Winstar Display Co. for component WH1602B-NYG-JT
         case (state)
             STATE_INIT_VCC_RISE: begin
                 t1_start = 1;
                 if (t1_done) begin
                     t1_start = 0;
-
                     next_cmd_state = CMD_STATE_READY;
                     next_state     = STATE_INIT_FUNC_SET_1;
                 end
@@ -114,7 +98,6 @@ module display_controller #(
                     t4_start = 1;
                     if (t4_done) begin
                         t4_start = 0;
-
                         next_cmd_state = CMD_STATE_READY;
                         next_state     = STATE_INIT_FUNC_SET_2;
                     end
@@ -129,7 +112,6 @@ module display_controller #(
                     t4_start = 1;
                     if (t4_done) begin
                         t4_start = 0;
-
                         next_cmd_state = CMD_STATE_READY;
                         next_state     = STATE_INIT_DISP_ON;
                     end
@@ -144,7 +126,6 @@ module display_controller #(
                     t4_start = 1;
                     if (t4_done) begin
                         t4_start = 0;
-
                         next_cmd_state = CMD_STATE_READY;
                         next_state     = STATE_INIT_DISP_CLR;
                     end
@@ -159,7 +140,6 @@ module display_controller #(
                     t2_start = 1;
                     if (t2_done) begin
                         t2_start = 0;
-
                         next_cmd_state = CMD_STATE_READY;
                         next_state     = STATE_INIT_ENTRY_MODE;
                     end
@@ -174,7 +154,6 @@ module display_controller #(
                     t4_start = 1;
                     if (t4_done) begin
                         t4_start = 0;
-
                         next_cmd_state = CMD_STATE_READY;
                         next_state     = STATE_DISP_CLR;
                     end
@@ -207,9 +186,14 @@ module display_controller #(
                     t3_start = 1;
                     if (t3_done) begin
                         t3_start = 0;
-
+                        ascii_index = ascii_index + 1;
                         next_cmd_state = CMD_STATE_READY;
-                        next_state     = STATE_PAUSE;
+                        if (ascii_index < 4)
+                            next_state = STATE_WRITE_DATA;
+                        else begin
+                            ascii_index = 0;
+                            next_state = STATE_PAUSE;
+                        end
                     end
                 end
             end
@@ -217,7 +201,6 @@ module display_controller #(
                 t7_start = 1;
                 if (t7_done) begin
                     t7_start = 0;
-
                     next_state = STATE_READY;
                 end
             end
@@ -237,6 +220,24 @@ module display_controller #(
             cmd_state <= next_cmd_state;
             state     <= next_state;
         end
+    end
+
+    always_comb begin : timer_logic
+        case (cmd_state) 
+
+        case (state)
+            STATE_INIT_VCC_RISE:   timer_count = cycles_40000us;
+            STATE_INIT_FUNC_SET_1,
+            STATE_INIT_FUNC_SET_2,
+            STATE_INIT_DISP_ON,
+            STATE_INIT_ENTRY_MODE: timer_count = cycles_39us;
+            STATE_INIT_DISP_CLR,
+            STATE_DISP_CLR:        timer_count = cycles_1530us;
+            STATE_READY,
+            STATE_WRITE_DATA:      timer_count = cycles_43us;
+            STATE_PAUSE:           timer_count = 50000000;
+            default:               timer_count = 1;
+        endcase
     end
 
     always_latch begin : output_logic
