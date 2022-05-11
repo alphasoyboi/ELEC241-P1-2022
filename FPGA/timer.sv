@@ -1,4 +1,4 @@
-module timer (output logic done, input int unsigned count, input logic clk, start, reset);
+module timer (output logic done, input int unsigned count, input logic clk, start, n_reset);
 
         typedef enum int unsigned { READY = 1, COUNTING, STOPPED } state_t;
 
@@ -21,15 +21,15 @@ module timer (output logic done, input int unsigned count, input logic clk, star
                 done = 0;
         end
 
-        always_ff @(posedge clk or negedge reset) begin : update_state
-            if (~reset)
+        always_ff @(posedge clk or negedge n_reset) begin : update_state
+            if (~n_reset)
                 state <= READY;
             else
                 state <= next_state;
         end
 
-        always_ff @(posedge clk or negedge reset) begin : update_count
-            if (~reset)
+        always_ff @(posedge clk or negedge n_reset) begin : update_count
+            if (~n_reset)
                 cycles <= 0;
             else begin
                 if (state == COUNTING)

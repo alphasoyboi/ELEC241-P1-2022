@@ -15,7 +15,7 @@ module display_controller #(
     input logic [11:0] angle,
     input logic write,
     input logic clk,
-    input logic reset
+    input logic n_reset
 );
 
     typedef enum int unsigned {
@@ -51,8 +51,8 @@ module display_controller #(
     logic cmd_timer_done, state_timer_done;
     logic cmd_timer_start, state_timer_start;
     int unsigned cmd_timer_count, state_timer_count;
-    timer cmd_timer (cmd_timer_done, cmd_timer_count, clk, cmd_timer_start, reset);
-    timer state_timer (state_timer_done, state_timer_count, clk, state_timer_start, reset);
+    timer cmd_timer (cmd_timer_done, cmd_timer_count, clk, cmd_timer_start, n_reset);
+    timer state_timer (state_timer_done, state_timer_count, clk, state_timer_start, n_reset);
 
     // angle converter
     bit [11:0] bcd;
@@ -202,8 +202,8 @@ module display_controller #(
         endcase
     end
 
-    always_ff @(posedge clk or negedge reset) begin : update_state
-        if (~reset) begin
+    always_ff @(posedge clk or negedge n_reset) begin : update_state
+        if (~n_reset) begin
             ascii       <= '{8'b0011_0000, 8'b0011_0000, 8'b0011_0000, 8'b0011_0000};
             ascii_index <= 0;
 
