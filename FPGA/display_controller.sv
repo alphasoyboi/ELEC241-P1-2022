@@ -4,7 +4,7 @@ module display_controller #(
     parameter int unsigned cycles_1530us  = 76500,   // delay for display clear
     parameter int unsigned cycles_43us    = 2150,    // delay for data register write
     parameter int unsigned cycles_39us    = 1950,    // delay for most instruction register writes
-    parameter int unsigned cycles_1060ns  = 53,      // write delay for enable pulse low
+    parameter int unsigned cycles_1200ns  = 60,      // write delay for enable pulse low
     parameter int unsigned cycles_140ns   = 7        // write delay for enable pulse high
 )   (
     output logic [7:0] data,
@@ -31,13 +31,6 @@ module display_controller #(
         STATE_PAUSE
     } state_t;
 
-    typedef enum int unsigned {
-        CMD_STATE_READY = 1,
-        CMD_STATE_WRITE_IR,  // write to instruction register
-        CMD_STATE_WRITE_DR,  // wrtie to data register
-        CMD_STATE_DONE
-    } cmd_state_t;
-
     typedef enum bit [7:0] {
         CMD_NULL,
         CMD_FUNC_SET   = 8'b0011_1000, // set 8 bit mode, 2 line display, and 5x8 font
@@ -47,12 +40,10 @@ module display_controller #(
         CMD_ENTRY_MODE = 8'b0000_0110  //
     } cmd_t;
 
-    // timers
-    logic cmd_timer_done, state_timer_done;
-    logic cmd_timer_start, state_timer_start;
-    int unsigned cmd_timer_count, state_timer_count;
-    timer cmd_timer (cmd_timer_done, cmd_timer_count, clk, cmd_timer_start, n_reset);
-    timer state_timer (state_timer_done, state_timer_count, clk, state_timer_start, n_reset);
+    // timer
+    logic timer_done, timer_start;
+    int unsigned timer_count;
+    timer t (timer_done, timer_count, clk, timer_start, n_reset);
 
     // angle converter
     bit [11:0] bcd;
@@ -60,24 +51,14 @@ module display_controller #(
     angle_to_bcd angle_data_converter(bcd, angle);
 
     cmd_t cmd;
-    cmd_state_t cmd_state, next_cmd_state;
-    state_t state, next_state;
-
     bit [7:0] ascii [4];
     int unsigned ascii_index;
 
-    always_comb begin : next_cmd_state_logic
-        case (cmd_state)
-            CMD_STATE_READY:
-            CMD_STATE_WRITE_IR,
-            CMD_STATE_WRITE_DR: begin
-                if (timer_done)
-                    next_cmd_state = CMD_STATE_DONE;
-            end
-            CMD_STATE_DONE:
-            default: next_cmd_state = CMD_STATE_READY;
-        endcase
-    end
+    state_t state, next_state;
+
+    logic [7:0] bus_data;
+    logic bus_write, bus_ir_dr, bus_busy;
+    display_data_bus_controller #(cycles_140ns) bus (data, rs, rw, e, bus_busy, bus_data, bus_write, bus_ir_dr, clk, n_reset);
 
     always_latch begin : next_state_logic
         // initialization sequence according to Winstar Display Co. for component WH1602B-NYG-JT
@@ -90,66 +71,55 @@ module display_controller #(
             STATE_INIT_FUNC_SET_1: begin
                 if (cmd_state == CMD_STATE_READY) begin
                     cmd = CMD_FUNC_SET;
+                    {cmd_write, cmd_ir_dr} = 2'b11;
                 end
                 if (cmd_state == CMD_STATE_DONE) begin
                     if (state_timer_done) begin
-                        next_state     = STATE_INIT_FUNC_SET_2;
+                        next_state = STATE_INIT_FUNC_SET_2;
                     end
                 end
             end
             STATE_INIT_FUNC_SET_2: begin
                 if (cmd_state == CMD_STATE_READY) begin
                     cmd = CMD_FUNC_SET;
-                    next_cmd_state = CMD_STATE_WRITE_IR;
+                    {cmd_write, cmd_ir_dr} = 2'b11;
                 end
                 if (cmd_state == CMD_STATE_DONE) begin
-                    t4_start = 1;
                     if (t4_done) begin
-                        t4_start = 0;
-                        next_cmd_state = CMD_STATE_READY;
-                        next_state     = STATE_INIT_DISP_ON;
+                        next_state = STATE_INIT_DISP_ON;
                     end
                 end
             end
             STATE_INIT_DISP_ON: begin
                 if (cmd_state == CMD_STATE_READY) begin
                     cmd = CMD_DISP_ON;
-                    next_cmd_state = CMD_STATE_WRITE_IR;
+                    {cmd_write, cmd_ir_dr} = 2'b11;
                 end
                 if (cmd_state == CMD_STATE_DONE) begin
-                    t4_start = 1;
                     if (t4_done) begin
-                        t4_start = 0;
-                        next_cmd_state = CMD_STATE_READY;
-                        next_state     = STATE_INIT_DISP_CLR;
+                        next_state = STATE_INIT_DISP_CLR;
                     end
                 end
             end
             STATE_INIT_DISP_CLR: begin
                 if (cmd_state == CMD_STATE_READY) begin
                     cmd = CMD_CLR_DISP;
-                    next_cmd_state = CMD_STATE_WRITE_IR;
+                    {cmd_write, cmd_ir_dr} = 2'b11;
                 end
                 if (cmd_state == CMD_STATE_DONE) begin
-                    t2_start = 1;
                     if (t2_done) begin
-                        t2_start = 0;
-                        next_cmd_state = CMD_STATE_READY;
-                        next_state     = STATE_INIT_ENTRY_MODE;
+                        next_state = STATE_INIT_ENTRY_MODE;
                     end
                 end
             end
             STATE_INIT_ENTRY_MODE: begin
                 if (cmd_state == CMD_STATE_READY) begin
                     cmd = CMD_ENTRY_MODE;
-                    next_cmd_state = CMD_STATE_WRITE_IR;
+                    {cmd_write, cmd_ir_dr} = 2'b11;
                 end
                 if (cmd_state == CMD_STATE_DONE) begin
-                    t4_start = 1;
                     if (t4_done) begin
-                        t4_start = 0;
-                        next_cmd_state = CMD_STATE_READY;
-                        next_state     = STATE_DISP_CLR;
+                        next_state = STATE_DISP_CLR;
                     end
                 end
             end
@@ -168,20 +138,17 @@ module display_controller #(
                         t2_start = 0;
 
                         next_cmd_state = CMD_STATE_READY;
-                        next_state     = STATE_WRITE_DATA;
+                        next_state = STATE_WRITE_DATA;
                     end
                 end
             end
             STATE_WRITE_DATA: begin
                 if (cmd_state == CMD_STATE_READY) begin
-                    next_cmd_state = CMD_STATE_WRITE_DR;
+                    {cmd_write, cmd_ir_dr} = 2'b10;
                 end
                 if (cmd_state == CMD_STATE_DONE) begin
-                    t3_start = 1;
                     if (t3_done) begin
-                        t3_start = 0;
                         ascii_index = ascii_index + 1;
-                        next_cmd_state = CMD_STATE_READY;
                         if (ascii_index < 4)
                             next_state = STATE_WRITE_DATA;
                         else begin
@@ -192,37 +159,19 @@ module display_controller #(
                 end
             end
             STATE_PAUSE: begin
-                t7_start = 1;
                 if (t7_done) begin
-                    t7_start = 0;
                     next_state = STATE_READY;
                 end
             end
-            default: next_state = STATE_INIT_VCC_RISE;
+            default: begin
+                next_state = STATE_INIT_VCC_RISE;
+                cmd_write = 0;
+                cmd_ir_dr = 0;
+            end
         endcase
-    end
-
-    always_ff @(posedge clk or negedge n_reset) begin : update_state
-        if (~n_reset) begin
-            ascii       <= '{8'b0011_0000, 8'b0011_0000, 8'b0011_0000, 8'b0011_0000};
-            ascii_index <= 0;
-
-            cmd_state <= CMD_STATE_READY;
-            state     <= STATE_INIT_VCC_RISE;
-        end
-        else begin
-            cmd_state <= next_cmd_state;
-            state     <= next_state;
-        end
     end
 
     always_comb begin : timer_logic
-        case (cmd_state) 
-            CMD_STATE_WRITE_IR,
-            CMD_STATE_WRITE_DR: cmd_timer_start = 1;
-            default:            cmd_timer_start = 0;
-        endcase
-
         case (state)
             STATE_INIT_VCC_RISE:   timer_count = cycles_40000us;
             STATE_INIT_FUNC_SET_1,
@@ -238,13 +187,19 @@ module display_controller #(
         endcase
     end
 
-    always_latch begin : output_logic
-        case (cmd_state)
-            CMD_STATE_WRITE_IR: {e, rs, rw, data} = {3'b100, cmd};
-            CMD_STATE_WRITE_DR: {e, rs, rw, data} = {3'b110, ascii[ascii_index]};
-            default: e = 0;
-        endcase
+    always_ff @(posedge clk or negedge n_reset) begin : update_state
+        if (~n_reset) begin
+            ascii       <= '{8'b0011_0000, 8'b0011_0000, 8'b0011_0000, 8'b0011_0000};
+            ascii_index <= 0;
 
+            state <= STATE_INIT_VCC_RISE;
+        end
+        else begin
+            state <= next_state;
+        end
+    end
+
+    always_comb begin : output_logic
         if (state == STATE_READY) 
             busy = 0;
         else

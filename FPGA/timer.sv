@@ -1,4 +1,4 @@
-module timer (output logic done, input int unsigned count, input logic clk, start, n_reset);
+module timer (output logic done, input int unsigned count, input logic start, clk, n_reset);
 
         typedef enum int unsigned { READY = 1, COUNTING, STOPPED } state_t;
 
