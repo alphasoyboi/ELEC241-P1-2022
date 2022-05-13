@@ -1083,43 +1083,43 @@ https://fpgasoftware.intel.com/eula.
 	(port
 		(pt 0 80)
 		(input)
-		(text "reset" (rect 0 0 24 12)(font "Arial" ))
-		(text "reset" (rect 21 75 45 87)(font "Arial" ))
+		(text "n_reset" (rect 0 0 36 12)(font "Arial" ))
+		(text "n_reset" (rect 21 75 57 87)(font "Arial" ))
 		(line (pt 0 80)(pt 16 80))
 	)
 	(port
 		(pt 184 32)
 		(output)
 		(text "data[7..0]" (rect 0 0 47 12)(font "Arial" ))
-		(text "data[7..0]" (rect 124 27 171 39)(font "Arial" ))
+		(text "data[7..0]" (rect 124 27 163 39)(font "Arial" ))
 		(line (pt 184 32)(pt 168 32)(line_width 3))
 	)
 	(port
 		(pt 184 48)
 		(output)
 		(text "rs" (rect 0 0 9 12)(font "Arial" ))
-		(text "rs" (rect 156 43 165 55)(font "Arial" ))
+		(text "rs" (rect 156 43 163 55)(font "Arial" ))
 		(line (pt 184 48)(pt 168 48))
 	)
 	(port
 		(pt 184 64)
 		(output)
 		(text "rw" (rect 0 0 10 12)(font "Arial" ))
-		(text "rw" (rect 155 59 165 71)(font "Arial" ))
+		(text "rw" (rect 155 59 163 71)(font "Arial" ))
 		(line (pt 184 64)(pt 168 64))
 	)
 	(port
 		(pt 184 80)
 		(output)
 		(text "e" (rect 0 0 5 12)(font "Arial" ))
-		(text "e" (rect 159 75 164 87)(font "Arial" ))
+		(text "e" (rect 159 75 163 87)(font "Arial" ))
 		(line (pt 184 80)(pt 168 80))
 	)
 	(port
 		(pt 184 96)
 		(output)
 		(text "busy" (rect 0 0 24 12)(font "Arial" ))
-		(text "busy" (rect 143 91 167 103)(font "Arial" ))
+		(text "busy" (rect 143 91 163 103)(font "Arial" ))
 		(line (pt 184 96)(pt 168 96))
 	)
 	(parameter
@@ -1143,8 +1143,8 @@ https://fpgasoftware.intel.com/eula.
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
-		"cycles_1060ns"
-		"00000000000000000000000000110101"
+		"cycles_1200ns"
+		"00000000000000000000000000111100"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
 	(parameter
@@ -1152,15 +1152,77 @@ https://fpgasoftware.intel.com/eula.
 		"00000000000000000000000000000111"
 		""
 		(type "PARAMETER_UNSIGNED_BIN")	)
+	(parameter
+		"cycles_1060ns"
+		"00000000000000000000000000110101"
+		""
+		(type "PARAMETER_UNSIGNED_BIN")	)
 	(drawing
 		(rectangle (rect 16 16 168 128))
 	)
-	(annotation_block (parameter)(rect -408 664 0 800))
+	(annotation_block (parameter)(rect -408 656 0 800))
 )
 (symbol
-	(rect 8 -56 232 56)
+	(rect 288 -56 464 88)
+	(text "pwm_controller" (rect 5 0 78 12)(font "Arial" ))
+	(text "inst7" (rect 8 128 31 140)(font "Arial" ))
+	(port
+		(pt 0 32)
+		(input)
+		(text "duty[7..0]" (rect 0 0 48 12)(font "Arial" ))
+		(text "duty[7..0]" (rect 21 27 69 39)(font "Arial" ))
+		(line (pt 0 32)(pt 16 32)(line_width 3))
+	)
+	(port
+		(pt 0 48)
+		(input)
+		(text "period[7..0]" (rect 0 0 55 12)(font "Arial" ))
+		(text "period[7..0]" (rect 21 43 76 55)(font "Arial" ))
+		(line (pt 0 48)(pt 16 48)(line_width 3))
+	)
+	(port
+		(pt 0 64)
+		(input)
+		(text "ctrl[1..0]" (rect 0 0 41 12)(font "Arial" ))
+		(text "ctrl[1..0]" (rect 21 59 62 71)(font "Arial" ))
+		(line (pt 0 64)(pt 16 64)(line_width 3))
+	)
+	(port
+		(pt 0 80)
+		(input)
+		(text "clk" (rect 0 0 14 12)(font "Arial" ))
+		(text "clk" (rect 21 75 35 87)(font "Arial" ))
+		(line (pt 0 80)(pt 16 80))
+	)
+	(port
+		(pt 0 96)
+		(input)
+		(text "n_reset" (rect 0 0 36 12)(font "Arial" ))
+		(text "n_reset" (rect 21 91 57 103)(font "Arial" ))
+		(line (pt 0 96)(pt 16 96))
+	)
+	(port
+		(pt 176 32)
+		(output)
+		(text "motor_a" (rect 0 0 40 12)(font "Arial" ))
+		(text "motor_a" (rect 122 27 155 39)(font "Arial" ))
+		(line (pt 176 32)(pt 160 32))
+	)
+	(port
+		(pt 176 48)
+		(output)
+		(text "motor_b" (rect 0 0 40 12)(font "Arial" ))
+		(text "motor_b" (rect 122 43 155 55)(font "Arial" ))
+		(line (pt 176 48)(pt 160 48))
+	)
+	(drawing
+		(rectangle (rect 16 16 160 128))
+	)
+)
+(symbol
+	(rect -8 -72 200 40)
 	(text "servo_controller_unit" (rect 5 0 107 12)(font "Arial" ))
-	(text "inst7" (rect 8 96 31 108)(font "Arial" ))
+	(text "inst10" (rect 8 96 37 108)(font "Arial" ))
 	(port
 		(pt 0 32)
 		(input)
@@ -1171,26 +1233,40 @@ https://fpgasoftware.intel.com/eula.
 	(port
 		(pt 0 48)
 		(input)
-		(text "reset" (rect 0 0 24 12)(font "Arial" ))
-		(text "reset" (rect 21 43 45 55)(font "Arial" ))
+		(text "n_reset" (rect 0 0 36 12)(font "Arial" ))
+		(text "n_reset" (rect 21 43 57 55)(font "Arial" ))
 		(line (pt 0 48)(pt 16 48))
 	)
 	(port
-		(pt 0 64)
-		(input)
-		(text "input_register[31..0]" (rect 0 0 97 12)(font "Arial" ))
-		(text "input_register[31..0]" (rect 21 59 118 71)(font "Arial" ))
-		(line (pt 0 64)(pt 16 64)(line_width 3))
-	)
-	(port
-		(pt 224 32)
+		(pt 208 32)
 		(output)
 		(text "angle[11..0]" (rect 0 0 57 12)(font "Arial" ))
-		(text "angle[11..0]" (rect 155 27 203 39)(font "Arial" ))
-		(line (pt 224 32)(pt 208 32)(line_width 3))
+		(text "angle[11..0]" (rect 139 27 187 39)(font "Arial" ))
+		(line (pt 208 32)(pt 192 32)(line_width 3))
+	)
+	(port
+		(pt 208 48)
+		(output)
+		(text "motor_period[7..0]" (rect 0 0 89 12)(font "Arial" ))
+		(text "motor_period[7..0]" (rect 112 43 187 55)(font "Arial" ))
+		(line (pt 208 48)(pt 192 48)(line_width 3))
+	)
+	(port
+		(pt 208 64)
+		(output)
+		(text "motor_duty[7..0]" (rect 0 0 82 12)(font "Arial" ))
+		(text "motor_duty[7..0]" (rect 118 59 187 71)(font "Arial" ))
+		(line (pt 208 64)(pt 192 64)(line_width 3))
+	)
+	(port
+		(pt 208 80)
+		(output)
+		(text "motor_ctrl[1..0]" (rect 0 0 75 12)(font "Arial" ))
+		(text "motor_ctrl[1..0]" (rect 124 75 187 87)(font "Arial" ))
+		(line (pt 208 80)(pt 192 80)(line_width 3))
 	)
 	(drawing
-		(rectangle (rect 16 16 208 96))
+		(rectangle (rect 16 16 192 96))
 	)
 )
 (connector
@@ -1296,16 +1372,6 @@ https://fpgasoftware.intel.com/eula.
 	(text "CLOCK_50" (rect -238 -72 -183 -60)(font "Arial" ))
 	(pt -248 -56)
 	(pt -176 -56)
-)
-(connector
-	(text "key[0]" (rect -86 368 -56 385)(font "Intel Clear" ))
-	(pt -104 384)
-	(pt 48 384)
-)
-(connector
-	(text "key[1]" (rect -94 408 -64 425)(font "Intel Clear" ))
-	(pt -104 424)
-	(pt 48 424)
 )
 (connector
 	(text "optoa" (rect -142 488 -115 505)(font "Intel Clear" ))
@@ -1566,20 +1632,75 @@ https://fpgasoftware.intel.com/eula.
 	(bus)
 )
 (connector
-	(text "angle[11..0]" (rect 242 -40 298 -23)(font "Intel Clear" ))
-	(pt 296 -24)
-	(pt 232 -24)
+	(text "key[0]" (rect -86 368 -56 385)(font "Intel Clear" ))
+	(pt -104 384)
+	(pt -32 384)
+)
+(connector
+	(text "key[1]" (rect -94 408 -64 425)(font "Intel Clear" ))
+	(pt -104 424)
+	(pt -32 424)
+)
+(connector
+	(text "motor_a" (rect 10 368 50 385)(font "Intel Clear" ))
+	(pt 0 384)
+	(pt 48 384)
+)
+(connector
+	(text "motor_b" (rect 10 408 50 425)(font "Intel Clear" ))
+	(pt 0 424)
+	(pt 48 424)
+)
+(connector
+	(text "CLOCK_50" (rect 232 8 285 25)(font "Intel Clear" ))
+	(pt 224 24)
+	(pt 288 24)
+)
+(connector
+	(text "areset" (rect 234 24 263 41)(font "Intel Clear" ))
+	(pt 288 40)
+	(pt 224 40)
+)
+(connector
+	(text "motor_a" (rect 474 -40 514 -23)(font "Intel Clear" ))
+	(pt 464 -24)
+	(pt 520 -24)
+)
+(connector
+	(text "motor_b" (rect 474 -24 514 -7)(font "Intel Clear" ))
+	(pt 464 -8)
+	(pt 520 -8)
+)
+(connector
+	(pt 200 8)
+	(pt 288 8)
 	(bus)
 )
 (connector
-	(text "areset" (rect -46 -24 -17 -7)(font "Intel Clear" ))
-	(pt -56 -8)
-	(pt 8 -8)
+	(pt 200 -8)
+	(pt 288 -8)
+	(bus)
 )
 (connector
-	(text "CLOCK_50" (rect -46 -40 7 -23)(font "Intel Clear" ))
-	(pt -56 -24)
-	(pt 8 -24)
+	(pt 200 -24)
+	(pt 288 -24)
+	(bus)
+)
+(connector
+	(text "areset" (rect -62 -40 -33 -23)(font "Intel Clear" ))
+	(pt -72 -24)
+	(pt -8 -24)
+)
+(connector
+	(text "CLOCK_50" (rect -62 -56 -9 -39)(font "Intel Clear" ))
+	(pt -72 -40)
+	(pt -8 -40)
+)
+(connector
+	(text "angle[11..0]" (rect 210 -56 266 -39)(font "Intel Clear" ))
+	(pt 264 -40)
+	(pt 200 -40)
+	(bus)
 )
 (junction (pt 680 696))
 (junction (pt 664 728))
