@@ -1,0 +1,24 @@
+i've just looked into PWM a little and i think i've found a pretty simple explanation. 
+if you think of it as producing a wave of the output strength, the period is the frequency of the wave, and the duty cycle is the percentage of the period where the signal is high.
+since we're being told to feed it a duty cycle of the same resolution as the period, i think that what we're setting is the fixed length of it.
+
+assuming i'm right, which i'll check with nick when i can, we can write this for the controller:
+
+for(int i = 0; i < period; i++) begin
+	if(duty_cycle >= i) begin
+		if(clockwise = 1'b1) begin
+			motor2 = 1'b1;
+			motor1 = 1'b0;
+		end
+		else begin
+			motor1 = 1'b1;
+			motor2 = 1'b0;
+		end
+	end
+	else begin
+		motor1 = 1'b0;
+		motor2 = 1'b0;
+	end
+end
+
+-jason
