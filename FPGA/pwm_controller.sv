@@ -1,8 +1,8 @@
 module pwm_controller(
     output logic motor_a,
     output logic motor_b, 
-    input logic [7:0] duty, 
     input logic [7:0] period,
+	 input logic [7:0] duty, 
     input logic [1:0] ctrl,
     input logic clk,
     input logic n_reset
@@ -11,7 +11,7 @@ module pwm_controller(
 int unsigned clk_cnt, period_in_cycles, duty_in_cycles;
 
 always_comb begin
-    period_in_cycles = period * 500;
+    period_in_cycles = period * 5000;
     duty_in_cycles = duty * period_in_cycles / 255;
 end
 

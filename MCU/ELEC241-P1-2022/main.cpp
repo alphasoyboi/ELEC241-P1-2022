@@ -1,30 +1,31 @@
 #include "uop_msb.h"
 #include "elec241.h"
-//Define an instance of SPI - this is a SPI master device
-SPI spi(PA_7, PA_6, PA_5);      // Ordered as: mosi, miso, sclk could use forth parameter ssel
 
-//We often use a separate signal for the chip select. It is VITAL that for each SPI port, only ONE SPI slave device is enabled.
-DigitalOut cs(PC_6);            // Chip Select for Basic Outputs to illuminate Onboard FPGA DEO nano LEDs CN7 pin 1
+DigitalIn DO_NOT_USE(PB_12); // This Pin is connected to the 5VDC from the FPGA card and an INPUT that is 5V Tolerant
 
-// **************************************************************************
-// ******************** NB the following line for F429ZI ******************** 
-// *    The following line is essential when using this ribbon connector    *
-// **************************************************************************
-DigitalIn DO_NOT_USE(PB_12);    // MAKE PB_12 (D19) an INPUT do NOT make an OUTPUT under any circumstances !!!!! ************* !!!!!!!!!!!
-                                // This Pin is connected to the 5VDC from the FPGA card and an INPUT that is 5V Tolerant
-// **********************************************************************************************************
+// serial peripheral interface (SPI)
+SPI spi(PA_7, PA_6, PA_5); // mosi, miso, sclk
+DigitalOut cs(PC_6);       // chip select
+
+// buffered serial for terminal connection
+static BufferedSerial serial_port(USBTX, USBRX);
+// module support board buttons a & b
+InterruptIn button_a(PG_0), button_b(PG_1);
 
 
-// **************************************** Function prototypes *********************************************
-uint16_t spi_readwrite(uint16_t data);  
-// **********************************************************************************************************
+uint16_t spi_readwrite(uint16_t data);
 
-
-// **********************************************************************************************************
-// Main function	
-// **********************************************************************************************************
 
 int main() {
+    serial_port.set_baud(9600);
+    serial_port.set_format(
+        /* bits */     8,
+        /* parity */   SerialBase::None,
+        /* stop bit */ 1
+    );
+    // turn off blocking read/writes
+    serial_port.set_blocking(false);
+
     //SET UP THE SPI INTERFACE
     cs = 1;                     // Chip must be deselected, Chip Select is active LOW
     spi.format(16,0);           // Setup the DATA frame SPI for 16 bit wide word, Clock Polarity 0 and Clock Phase 0 (0)
