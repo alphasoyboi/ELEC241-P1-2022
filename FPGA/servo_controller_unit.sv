@@ -1,10 +1,8 @@
 module servo_controller_unit (
-    output logic [11:0] angle, 
     output logic [7:0] motor_period, motor_duty, 
     output logic [1:0] motor_ctrl, 
-	 input logic [11:0] actual_angle,
-	 input logic [11:0] target_angle,
-    input logic clk, input logic n_reset
+    output logic [31:0] status_reg, 
+	input logic [31:0] input_reg
 );
 
 assign angle = 12'd1006;

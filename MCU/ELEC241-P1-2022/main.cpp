@@ -1,5 +1,6 @@
 #include "uop_msb.h"
 #include "elec241.h"
+#include <string>
 
 DigitalIn DO_NOT_USE(PB_12); // This Pin is connected to the 5VDC from the FPGA card and an INPUT that is 5V Tolerant
 
@@ -12,9 +13,13 @@ static BufferedSerial serial_port(USBTX, USBRX);
 // module support board buttons a & b
 InterruptIn button_a(PG_0), button_b(PG_1);
 
-
 uint16_t spi_readwrite(uint16_t data);
 
+typedef enum {
+    WAIT_COMMAND,
+    READ_COMMAND,
+    READ_VALUE,
+} TermState;
 
 int main() {
     serial_port.set_baud(9600);
@@ -35,9 +40,16 @@ int main() {
     // This will hold the 16-bit data returned from the SPI interface (sent by the FPGA)
     // Currently the inputs to the SPI recieve are left floating (see quartus files)
     uint16_t rx;
+    TermState term_state;
+    char c;
 
     while(true)                 
     {
+        if (term_state == READ_COMMAND) {
+            std::string msg = "type help for commands";
+            serial_port.write(msg.c_str(), msg.length());
+        }
+        
         rx = spi_readwrite(0x00AA);     // Send binary 0000 0000 1010 1010
         printf("Recieved: %u\n",rx);    // Display the value returned by the FPGA
         wait_us(1000000);               // 
