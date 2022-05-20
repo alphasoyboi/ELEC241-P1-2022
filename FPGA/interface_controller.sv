@@ -20,15 +20,15 @@ end
 always_ff @(negedge readBusy) begin
 	controls = spi_data[15:12];
 	data = spi_data[11:0];
-	if(controls == 2'd2)
+	if(controls == 4'd2)
 		inDat[11:0] = data;
-	else if(controls == 2'd3)
+	else if(controls == 4'd3)
 		inDat[19:12] = data[7:0];
-	else if(controls == 2'd4)
+	else if(controls == 4'd4)
 		inDat[28:27] = data[1:0];
-	else if(controls == 2'd5)
+	else if(controls == 4'd5)
 		inDat[30:29] = data[1:0];
-	else if(controls == 2'd6)
+	else if(controls == 4'd6)
 		inDat[31] = data[0];
 end
 
