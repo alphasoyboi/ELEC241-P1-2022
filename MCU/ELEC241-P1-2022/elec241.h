@@ -4,7 +4,6 @@
 
 typedef enum {
     READBACK = 0,
-    LEDS_AND_SWITCHES, 
     ANGLE, 
     PWM_PERIOD, 
     CTRL_MODE, 

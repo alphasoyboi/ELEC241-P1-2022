@@ -1,6 +1,5 @@
 #include "uop_msb.h"
-#include "elec241.h"
-#include <algorithm>
+#include <cstdint>
 #include <string>
 
 DigitalIn DO_NOT_USE(PB_12); // This Pin is connected to the 5VDC from the FPGA card and an INPUT that is 5V Tolerant
@@ -9,34 +8,51 @@ DigitalIn DO_NOT_USE(PB_12); // This Pin is connected to the 5VDC from the FPGA 
 SPI spi(PA_7, PA_6, PA_5); // mosi, miso, sclk
 DigitalOut cs(PC_6);       // chip select
 
-// buffered serial for terminal connection
-static BufferedSerial serial_port(USBTX, USBRX);
 // module support board buttons a & b
 static InterruptIn button_a(PG_0), button_b(PG_1);
-DigitalOut tx_led(LED1);
 
-static const char *help_msg = R"(
+typedef enum : uint16_t {
+    INSTR_ILLEGAL = 0,
+    INSTR_READBACK,
+    INSTR_ANGLE, 
+    INSTR_PWM_PERIOD, 
+    INSTR_CTRL_MODE, 
+    INSTR_COMMAND, 
+    INSTR_PWM_POWER,
+} InstrType;
+
+enum CtrlMode : uint16_t {
+    BANG_BANG = 0,
+    PROPORTIONAL,
+};
+
+enum Command : uint16_t {
+    CONTINUOUS_MODE = 0,
+    RESET_ZERO_ANGLE,
+    BRAKE,
+};
+
+// buffered serial for terminal connection
+static BufferedSerial serial_port(USBTX, USBRX);
+static const std::string help_msg = R"(
 commands:
-    help   [angle|period|ctrl|cmd|power]
+    help   (show this menu)
+    status (display current servo angle)
     angle  [0..360]
-    period [0..255]
+    period [0..255] (255 = 0.0255s)
     ctrl   [bang|prop]
     cmd    [cont|zero|brake]
     power  [on|off]
-    status (display current servo angle)
 
 )";
-static const char *help_msg_angle  = "\nangle [0..360] - set servo angle (degrees)\n";
-static const char *help_msg_period = "\nperiod [0..255] - set pwm period (255 = 0.0255 seconds)\n";
-static const char *help_msg_ctrl   = "\nctrl [bang|prop] - set control mode (bang-bang, proportional)\n";
-static const char *help_msg_cmd    = "\ncmd [cont|zero|brake] - send command (toggle continuous mode, reset zero angle, toggle brake)\n";
-static const char *help_msg_power  = "\npower [on|off] - set pwm power\n";
-static const char *inv_cmd_msg = "invalid command (type \"help\" for commands and arguments)\n\n";
-static const char *inv_arg_msg = "invalid value (type \"help\" for commands and arguments)\n\n";
+static const std::string inv_cmd_msg = "invalid command (type \"help\" for commands and arguments)\n\n";
+static const std::string inv_arg_msg = "invalid value (type \"help\" for commands and arguments)\n\n";
 
 uint16_t spi_readwrite(uint16_t data);
-void term_write(int angle);
-void term_read(int &new_angle, int &new_period, int current_angle);
+uint16_t convert_angle_to_pulses(int angle);
+int convert_pulses_readback_to_angle(uint16_t pulses);
+uint16_t create_instr(InstrType type, uint16_t data);
+uint16_t term_read(int current_angle);
 int parse_cmd_int_arg(const std::string &cmd_buf);
 
 int main() {
@@ -61,7 +77,7 @@ int main() {
     serial_port.set_blocking(false);
 
     int angle = 0, new_angle = 0;
-    int period = 0, new_period = 20;
+    uint16_t instr, new_instr, pulses_readback = 0;
 
     // assign interrupts
     button_a.rise([&new_angle](){
@@ -75,31 +91,18 @@ int main() {
             new_angle = 360;
     });
 
-    serial_port.write(help_msg, strlen(help_msg));
+    serial_port.write(help_msg.c_str(), help_msg.length());
     while(true)                 
     {    
-        term_read(new_angle, new_period, 360);
-        if (angle != new_angle) {
+        new_instr = term_read(convert_pulses_readback_to_angle(pulses_readback));
+        if (angle != new_angle) { // check if angle has been updated
             angle = new_angle;
-            tx = ANGLE << 12;
-            tx += (uint16_t)angle;
-            rx = spi_readwrite(tx);
+            rx = spi_readwrite(create_instr(INSTR_ANGLE, convert_angle_to_pulses(angle)));
         }
-        if (period != new_period) {
-            period = new_period;
-            tx = PWM_PERIOD << 12;
-            tx += (uint16_t)period;
-            rx = spi_readwrite(tx);
+        if (new_instr && instr != new_instr) { // check for new valid instruction
+            instr = new_instr;
+            rx = spi_readwrite(instr);
         }
-
-        /*
-        rx = spi_readwrite(0x00AA);     // Send binary 0000 0000 1010 1010
-        printf("Recieved: %u\n",rx);    // Display the value returned by the FPGA
-        wait_us(1000000);               // 
-        rx = spi_readwrite(0x0055);     // Send binary 0000 0000 0101 0101
-        printf("Recieved: %u\n",rx);    // Display the value returned by the FPGA
-        wait_us(1000000);               //
-        */
     }
 }
 
@@ -120,16 +123,34 @@ uint16_t spi_readwrite(uint16_t data) {
 	return rx;
 }
 
-void term_read(int &new_angle, int &new_period, int current_angle)
+uint16_t convert_angle_to_pulses(int angle)
+{
+    return angle * (1006 / 360);
+}
+
+int convert_pulses_readback_to_angle(uint16_t pulses)
+{
+    return (~(INSTR_READBACK << 12) & pulses) * 360 / 1006;
+}
+
+uint16_t create_instr(InstrType type, uint16_t data)
+{
+    return (type << 12) | (data & 0x0FFF);
+}
+
+uint16_t term_read(int current_angle)
 {
     typedef enum {
         READ_CMD,
         PARSE_CMD
-    } term_state_t;
-    static term_state_t state = READ_CMD;
+    } TermState;
+    static TermState state = READ_CMD;
     
     char c = 0;
     static std::string buf;
+
+    InstrType instr_type = INSTR_ILLEGAL;
+    uint16_t instr_data = 0;
 
     switch (state) {
         case READ_CMD: {
@@ -145,63 +166,76 @@ void term_read(int &new_angle, int &new_period, int current_angle)
             }
             break;
         }
-        case PARSE_CMD: {
+        case PARSE_CMD: { // i think the use of goto is justified... idk
             if (buf.find("help") == 0) {
-                serial_port.write(help_msg, strlen(help_msg));
+                serial_port.write(help_msg.c_str(), help_msg.length());
             } 
             else if (buf.find("angle") == 0) {
-                int val = parse_cmd_int_arg(buf);
-                if (val < 0 || val > 360)
-                    serial_port.write(inv_arg_msg, strlen(inv_arg_msg));
+                instr_type = INSTR_ANGLE;
+                int angle = parse_cmd_int_arg(buf);
+                if (angle < 0 || angle > 360)
+                    goto INVALID_ARG;
                 else
-                    new_angle = val;
+                    instr_data = convert_angle_to_pulses(angle);
             }
             else if (buf.find("period") == 0) {
-                int val = parse_cmd_int_arg(buf);
-                if (val < 0 || val > 255)
-                    serial_port.write(inv_arg_msg, strlen(inv_arg_msg));
+                instr_type = INSTR_PWM_PERIOD;
+                int period = parse_cmd_int_arg(buf);
+                if (period < 0 || period > 255)
+                    goto INVALID_ARG;
                 else
-                    new_period = val;
+                    instr_data = period;
             }
             else if (buf.find("ctrl") == 0) {
+                instr_type = INSTR_CTRL_MODE;
                 if (buf.find("bang") == 5)
-                    ;// sent bang-bang control
+                    instr_data = BANG_BANG;
                 else if (buf.find("prop") == 5)
-                    ;// sent proportional control
+                    instr_data = PROPORTIONAL;
                 else 
-                    serial_port.write(inv_arg_msg, strlen(inv_arg_msg));
+                    goto INVALID_ARG;
             }
             else if (buf.find("cmd") == 0) {
+                instr_type = INSTR_COMMAND;
                 if (buf.find("cont") == 4)
-                    ;
+                    instr_data = CONTINUOUS_MODE;
                 else if (buf.find("zero") == 4)
-                    ;
+                    instr_data = RESET_ZERO_ANGLE;
                 else if (buf.find("brake") == 4)
-                    ;
+                    instr_data = BRAKE;
                 else 
-                    serial_port.write(inv_arg_msg, strlen(inv_arg_msg));
+                    goto INVALID_ARG;
             }
             else if (buf.find("power") == 0) {
+                instr_type = INSTR_PWM_POWER;
                 if (buf.find("on") == 6)
-                    ;
+                    instr_data = 0;
                 else if (buf.find("off") == 6)
-                    ;
+                    instr_data = 1;
                 else 
-                    serial_port.write(inv_arg_msg, strlen(inv_arg_msg));
+                    goto INVALID_ARG;
             }
             else if (buf.find("status") == 0) {
-                std::string status = "current angle: " + std::to_string(current_angle) + "\n";
+                std::string status = "current angle: " + std::to_string(current_angle) + "\n\n";
                 serial_port.write(status.c_str(), status.length());
             }
             else {
-                serial_port.write(inv_cmd_msg, strlen(inv_cmd_msg));
+                serial_port.write(inv_cmd_msg.c_str(), inv_cmd_msg.length());
             }
 
             buf.erase();
             state = READ_CMD;
             break;
+
+            INVALID_ARG:
+            instr_type = INSTR_ILLEGAL;
+            serial_port.write(inv_arg_msg.c_str(), inv_arg_msg.length());
+            buf.erase();
+            state = READ_CMD;
         }
     }
+
+    return create_instr(instr_type, instr_data);
 }
 
 int parse_cmd_int_arg(const std::string &cmd_buf)
