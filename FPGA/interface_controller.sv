@@ -18,7 +18,8 @@ always_ff @(posedge writeBusy, posedge clk) begin
 end
 
 always_ff @(negedge readBusy) begin
-	{controls, data} = spi_data;
+	controls = spi_data[15:12];
+	data = spi_data[11:0];
 	if(controls == 2'd2)
 		inDat[11:0] = data;
 	else if(controls == 2'd3)

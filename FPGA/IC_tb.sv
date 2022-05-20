@@ -4,7 +4,8 @@ logic CLK = 0;
 logic readBusy = 0;
 logic writeBusy = 0;
 logic [15:0] spi, outgoingData;
-logic [31:0] statusReg, incomingData;
+logic [31:0] statusReg = 0;
+logic [31:0] incomingData;
 
 interface_controller u1(outgoingData, incomingData, statusReg, spi, readBusy, writeBusy, CLK);
 
@@ -57,6 +58,8 @@ initial begin
 	@(negedge CLK);
 	readBusy = 1'b0;
 	#11ps assert(incomingData == 32'b1_10_11_0000000_01000011_001101000011) $display("Power Change PASS"); else $error("Power Change FAIL");
+	#100ps;
+	$stop;
 
 end
 
