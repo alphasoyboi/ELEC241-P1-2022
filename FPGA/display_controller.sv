@@ -1,7 +1,7 @@
 module display_controller #(
     // delays in clock pulses
     parameter int unsigned cycles_40000us = 2000000, // delay for vcc rise
-    parameter int unsigned cycles_1530us  = 76500,   // delay for display clear
+    parameter int unsigned cycles_2000us  = 100000,  // delay for display clear
     parameter int unsigned cycles_43us    = 2150,    // delay for data register write
     parameter int unsigned cycles_39us    = 1950,    // delay for most instruction register writes
     parameter int unsigned cycles_1200ns  = 60,      // write delay for enable pulse low
@@ -23,7 +23,7 @@ enum bit [7:0] {
     CMD_DISP_ON    = 8'b0000_1100, // turn display on, turn cursor and cursor blinking off
     CMD_CLR_DISP   = 8'b0000_0001, //
     CMD_ENTRY_MODE = 8'b0000_0110  //
-}en;
+} cmd;
 
 typedef enum int unsigned {
     S0 = 1, // waiting for vcc rise
@@ -38,174 +38,121 @@ typedef enum int unsigned {
     S9      // pause
 } state_t;
 
-state_t state;
-
-// timers
-logic timer_done_40000us, timer_start_40000us;
-logic timer_done_1530us, timer_start_1530us;
-logic timer_done_43us, timer_start_43us;
-logic timer_done_39us, timer_start_39us;
-logic timer_done_1s, timer_start_1s;
-timer #(cycles_40000us) timer_40000us (timer_done_40000us, timer_done_40000us, clk,  n_reset);
-timer #(cycles_1530us) timer_1530us (timer_done_1530us, timer_start_1530us, clk, n_reset);
-timer #(cycles_43us) timer_43us (timer_done_43us, timer_start_43us, clk, n_reset);
-timer #(cycles_39us) timer_39us (timer_done_39us, timer_start_39us, clk, n_reset);
-timer #(50000000) timer_1s (timer_done_1s, timer_start_1s, clk, n_reset);
-
-bit data_written; 
-logic [7:0] bus_data;
-logic bus_write, bus_ir_dr, bus_busy;
-display_data_bus_controller bus (data, rs, rw, e, bus_busy, bus_data, bus_write, bus_ir_dr, clk, n_reset);
-
 logic [11:0] bcd;
 angle_to_bcd angle_converter(bcd, angle);
 
+int unsigned clk_cnt, ascii_index;
 logic [7:0] ascii[3:0];
-int unsigned ascii_index;
+state_t state;
 
 always_ff @(posedge clk or negedge n_reset) begin
     if (~n_reset) begin
-        state        <= S0;
-        data_written <= 0;
-        ascii_index  <= 0;
-        ascii <= '{8'b0011_0011, 8'b0011_0110, 8'b0011_0000, 8'b1101_1111}; 
+        clk_cnt     <= 0;
+        ascii_index <= 0;
+        state       <= S0;
 
-        {bus_write, bus_ir_dr, bus_data} <= 10'b0;
+        {e, rs, rw, data} <= 11'b0;
     end
     else begin
+        clk_cnt = clk_cnt + 1;
+
         case (state)
             S0: begin // vcc rise
-                timer_start_40000us <= 1'b1;
-                if (timer_done_40000us) begin
-                    timer_start_40000us <= 1'b0;
-                    state <= S1;
+                if (clk_cnt >= cycles_40000us) begin
+                    clk_cnt <= 0;
+                    state   <= S1;
                 end
             end
             S1: begin // func set 1
-                if (~data_written && ~bus_busy) begin
-                    {bus_write, bus_ir_dr, bus_data} <= {2'b11, CMD_FUNC_SET};
-                    data_written <= 1'b1;
-                end
-                else begin
-                    {bus_write, bus_ir_dr, bus_data} <= 10'b0;
-                    timer_start_39us <= 1'b1;
-                    if (timer_done_39us) begin
-                        timer_start_39us <= 1'b0;
-                        data_written <= 1'b0;
-                        state <= S2;
-                    end
+                if (clk_cnt < cycles_140ns)
+                    {e, rs, rw, data} <= {3'b100, CMD_FUNC_SET};
+                else
+                    e <= 0;
+                if (clk_cnt >= cycles_39us + cycles_1200ns) begin
+                    clk_cnt <= 0;
+                    state   <= S2;
                 end
             end
             S2: begin // func set 2
-                if (~data_written && ~bus_busy) begin
-                    {bus_write, bus_ir_dr, bus_data} <= {2'b11, CMD_FUNC_SET};
-                    data_written <= 1'b1;
-                end
-                else begin
-                    {bus_write, bus_ir_dr, bus_data} <= 10'b0;
-                    timer_start_39us <= 1'b1;
-                    if (timer_done_39us) begin
-                        timer_start_39us <= 1'b0;
-                        data_written <= 1'b0;
-                        state <= S3;
-                    end
+                if (clk_cnt < cycles_140ns)
+                    {e, rs, rw, data} <= {3'b100, CMD_FUNC_SET};
+                else
+                    e <= 0;
+                if (clk_cnt >= cycles_39us + cycles_1200ns) begin
+                    clk_cnt <= 0;
+                    state <= S3;
                 end
             end
             S3: begin // display on
-                if (~data_written && ~bus_busy) begin
-                    {bus_write, bus_ir_dr, bus_data} <= {2'b11, CMD_DISP_ON};
-                    data_written <= 1'b1;
-                end
-                else begin
-                    {bus_write, bus_ir_dr, bus_data} <= 10'b0;
-                    timer_start_39us <= 1'b1;
-                    if (timer_done_39us) begin
-                        timer_start_39us <= 1'b0;
-                        data_written <= 1'b0;
-                        state <= S4;
-                    end
+                if (clk_cnt < cycles_140ns)
+                    {e, rs, rw, data} <= {3'b100, CMD_DISP_ON};
+                else
+                    e <= 0;
+                if (clk_cnt >= cycles_39us + cycles_1200ns) begin
+                    clk_cnt <= 0;
+                    state <= S4;
                 end
             end
             S4: begin // display clr
-                if (~data_written && ~bus_busy) begin
-                    {bus_write, bus_ir_dr, bus_data} <= {2'b11, CMD_CLR_DISP};
-                    data_written <= 1'b1;
-                end
-                else begin
-                    {bus_write, bus_ir_dr, bus_data} <= 10'b0;
-                    timer_start_1530us <= 1'b1;
-                    if (timer_done_1530us) begin
-                        timer_start_1530us <= 1'b0;
-                        data_written <= 1'b0;
-                        state <= S5;
-                    end
+                if (clk_cnt < cycles_140ns)
+                    {e, rs, rw, data} <= {3'b100, CMD_CLR_DISP};
+                else
+                    e <= 0;
+                if (clk_cnt >= cycles_2000us + cycles_1200ns) begin
+                    clk_cnt <= 0;
+                    state <= S5;
                 end
             end
             S5: begin // entry mode
-                if (~data_written && ~bus_busy) begin
-                    {bus_write, bus_ir_dr, bus_data} <= {2'b11, CMD_ENTRY_MODE};
-                    data_written <= 1'b1;
-                end
-                else begin
-                    {bus_write, bus_ir_dr, bus_data} <= 10'b0;
-                    timer_start_39us <= 1'b1;
-                    if (timer_done_39us) begin
-                        timer_start_39us <= 1'b0;
-                        data_written <= 1'b0;
-                        state <= S6;
-                    end
+                if (clk_cnt < cycles_140ns)
+                    {e, rs, rw, data} <= {3'b100, CMD_ENTRY_MODE};
+                else
+                    e <= 0;
+                if (clk_cnt >= cycles_39us + cycles_1200ns) begin
+                    clk_cnt <= 0;
+                    state <= S6;
                 end
             end
             S6: begin // ready
+                ascii[0] <= {4'b0011, bcd[11:8]};
+                ascii[1] <= {4'b0011, bcd[7:4]};
+                ascii[2] <= {4'b0011, bcd[3:0]};
+                ascii[3] <= 8'b1101_1111;
                 state <= S7;
             end
             S7: begin // display clr
-                if (~data_written && ~bus_busy) begin
-                    {bus_write, bus_ir_dr, bus_data} <= {2'b11, CMD_CLR_DISP};
-                    data_written <= 1'b1;
-                end
-                else begin
-                    {bus_write, bus_ir_dr, bus_data} <= 10'b0;
-                    timer_start_1530us <= 1'b1;
-                    if (timer_done_1530us) begin
-                        timer_start_1530us <= 1'b0;
-                        data_written <= 1'b0;
-                        state <= S8;
-                    end
+                if (clk_cnt < cycles_140ns)
+                    {e, rs, rw, data} <= {3'b100, CMD_CLR_DISP};
+                else
+                    e <= 0;
+                if (clk_cnt >= cycles_2000us + cycles_1200ns) begin
+                    clk_cnt <= 0;
+                    state   <= S8;
                 end
             end
             S8: begin // write data
-                if (~data_written && ~bus_busy) begin
-                    {bus_write, bus_ir_dr, bus_data} <= {2'b10, ascii[ascii_index]};
-                    data_written <= 1'b1;
-                end
-                else begin
-                    {bus_write, bus_ir_dr, bus_data} <= 10'b0;
-                    timer_start_43us <= 1'b1;
-                    if (timer_done_43us) begin
-                        timer_start_43us <= 1'b0;
-                        data_written <= 1'b0;
-                        if (ascii_index < 4) begin
-                            ascii_index <= ascii_index + 1;
-                            state <= S8;
-                        end
-                        else begin
-                            ascii_index <= 0;
-                            state <= S9;
-                        end
+                if (clk_cnt < cycles_140ns)
+                    {e, rs, rw, data} <= {3'b110, ascii[ascii_index]};
+                else
+                    e <= 0;
+                if (clk_cnt >= cycles_43us + cycles_1200ns) begin
+                    clk_cnt <= 0;
+                    ascii_index <= ascii_index + 1;
+                    if (ascii_index == 3) begin
+                        ascii_index <= 0;
+                        state <= S9;
                     end
                 end
             end
             S9: begin // pause
-                timer_start_1s <= 1'b1;
-                if (timer_done_1s) begin
-                    timer_start_1s <= 1'b0;
-                    state <= S6;
+                if (clk_cnt >= 50000000) begin
+                    clk_cnt <= 0;
+                    state   <= S6;
                 end
             end
             default: begin
-                state <= S0;
-                data_written <= 0;
+                clk_cnt     <= 0;
+                state       <= S0;
                 ascii_index <= 0;
             end
         endcase
