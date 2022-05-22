@@ -27,15 +27,15 @@ https://fpgasoftware.intel.com/eula.
 	(port
 		(pt 0 32)
 		(input)
-		(text "statusReg[31..0]" (rect 0 0 64 12)(font "Arial" ))
-		(text "statusReg[31..0]" (rect 21 27 85 39)(font "Arial" ))
+		(text "status_reg[31..0]" (rect 0 0 66 12)(font "Arial" ))
+		(text "status_reg[31..0]" (rect 21 27 87 39)(font "Arial" ))
 		(line (pt 0 32)(pt 16 32)(line_width 3))
 	)
 	(port
 		(pt 0 48)
 		(input)
-		(text "spi_data[15..0]" (rect 0 0 56 12)(font "Arial" ))
-		(text "spi_data[15..0]" (rect 21 43 77 55)(font "Arial" ))
+		(text "spi_data_rx[15..0]" (rect 0 0 70 12)(font "Arial" ))
+		(text "spi_data_rx[15..0]" (rect 21 43 91 55)(font "Arial" ))
 		(line (pt 0 48)(pt 16 48)(line_width 3))
 	)
 	(port
@@ -62,15 +62,15 @@ https://fpgasoftware.intel.com/eula.
 	(port
 		(pt 240 32)
 		(output)
-		(text "outgoingData[15..0]" (rect 0 0 74 12)(font "Arial" ))
-		(text "outgoingData[15..0]" (rect 145 27 219 39)(font "Arial" ))
+		(text "spi_data_tx[15..0]" (rect 0 0 69 12)(font "Arial" ))
+		(text "spi_data_tx[15..0]" (rect 150 27 219 39)(font "Arial" ))
 		(line (pt 240 32)(pt 224 32)(line_width 3))
 	)
 	(port
 		(pt 240 48)
 		(output)
-		(text "incomingData[31..0]" (rect 0 0 76 12)(font "Arial" ))
-		(text "incomingData[31..0]" (rect 143 43 219 55)(font "Arial" ))
+		(text "input_reg[31..0]" (rect 0 0 60 12)(font "Arial" ))
+		(text "input_reg[31..0]" (rect 159 43 219 55)(font "Arial" ))
 		(line (pt 240 48)(pt 224 48)(line_width 3))
 	)
 	(drawing

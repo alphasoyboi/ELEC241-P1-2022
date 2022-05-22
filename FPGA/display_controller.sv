@@ -12,7 +12,7 @@ module display_controller #(
     output logic rw,
     output logic e,
     output logic busy,
-    input logic [11:0] angle,
+    input logic [31:0] angle,
     input logic write,
     input logic clk,
     input logic n_reset
@@ -21,8 +21,8 @@ module display_controller #(
 enum bit [7:0] {
     CMD_FUNC_SET   = 8'b0011_1000, // set 8 bit mode, 2 line display, and 5x8 font
     CMD_DISP_ON    = 8'b0000_1100, // turn display on, turn cursor and cursor blinking off
-    CMD_CLR_DISP   = 8'b0000_0001, //
-    CMD_ENTRY_MODE = 8'b0000_0110  //
+    CMD_CLR_DISP   = 8'b0000_0001, // clear the display
+    CMD_ENTRY_MODE = 8'b0000_0110  // 
 } cmd;
 
 typedef enum int unsigned {
@@ -39,7 +39,7 @@ typedef enum int unsigned {
 } state_t;
 
 logic [11:0] bcd;
-angle_to_bcd angle_converter(bcd, angle);
+angle_to_bcd angle_converter(bcd, angle[11:0]);
 
 int unsigned clk_cnt, ascii_index;
 logic [7:0] ascii[3:0];
@@ -152,8 +152,10 @@ always_ff @(posedge clk or negedge n_reset) begin
             end
             default: begin
                 clk_cnt     <= 0;
-                state       <= S0;
                 ascii_index <= 0;
+                state       <= S0;
+
+                {e, rs, rw, data} <= 11'b0;
             end
         endcase
     end

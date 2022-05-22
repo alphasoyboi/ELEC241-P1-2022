@@ -61,10 +61,6 @@ int main() {
     spi.format(16,0);           // Setup the DATA frame SPI for 16 bit wide word, Clock Polarity 0 and Clock Phase 0 (0)
     spi.frequency(1000000);     // 1MHz clock rate
     wait_us(10000);
-    // This will hold the 16-bit data returned from the SPI interface (sent by the FPGA)
-    // Currently the inputs to the SPI recieve are left floating (see quartus files)
-    uint16_t rx;
-    uint16_t tx;
 
     // set up terminal interface
     serial_port.set_baud(9600);
@@ -97,11 +93,11 @@ int main() {
         new_instr = term_read(convert_pulses_readback_to_angle(pulses_readback));
         if (angle != new_angle) { // check if angle has been updated
             angle = new_angle;
-            rx = spi_readwrite(create_instr(INSTR_ANGLE, convert_angle_to_pulses(angle)));
+            pulses_readback = spi_readwrite(create_instr(INSTR_ANGLE, convert_angle_to_pulses(angle)));
         }
-        if (new_instr && instr != new_instr) { // check for new valid instruction
+        if (new_instr && (instr != new_instr)) { // check for new valid instruction
             instr = new_instr;
-            rx = spi_readwrite(instr);
+            pulses_readback = spi_readwrite(instr);
         }
     }
 }
