@@ -1,6 +1,5 @@
 module servo_controller_unit (
-    output logic [7:0] motor_period, motor_duty, 
-    output logic [1:0] motor_ctrl, 
+    output logic [7:0] motor_period, motor_duty,
     output logic [31:0] status_reg,
     output logic atuReset, atuMonitor, clockwise, brake, pwmOn, 
     input logic [31:0] input_reg, 
@@ -22,6 +21,7 @@ int propUpper, propLower, propOverUpper, propOverLower;
 assign status_reg = statusInternal;
 assign motor_period = pwmPeriod;
 assign motor_duty = pwmDuty;
+assign pwmOn = power;
 
 always_ff @(posedge clk) begin
 	inputInternal = input_reg;
@@ -53,50 +53,43 @@ always_ff @(posedge clk) begin
 		clockwiseBounds = 1006;
 	end
 	else begin
-	if((currentAngle > desiredAngle && currentAngle < clockwiseBounds) || (currentAngle < desiredAngle && currentAngle < overflowBounds))
-		clockwise = 0;
-	else
-		clockwise = 1;
-	if(controlMode == 2'b00) begin
-		if(currentAngle == desiredAngle)
-			pwmDuty = 8'd0;
+		if((currentAngle > desiredAngle && currentAngle < clockwiseBounds) || (currentAngle < desiredAngle && currentAngle < overflowBounds))
+			clockwise = 0;
 		else
-			pwmDuty = 8'd255;
-	end
-	else if(controlMode == 2'b01) begin
-		propUpper = desiredAngle + 256;
-		propLower = desiredAngle - 255;
-		propOverUpper = 0;
-		propOverLower = 1006;
-		if(propUpper > 1006) begin
-			propOverUpper = propUpper - 1006;
-			propUpper = 1006;
+			clockwise = 1;
+		if(controlMode == 2'b00) begin
+			if(currentAngle == desiredAngle)
+				pwmDuty = 8'd0;
+			else
+				pwmDuty = 8'd255;
 		end
-		else if(propLower < 0) begin
-			propOverLower = propLower + 1006;
-			propLower = 0;
+		else if(controlMode == 2'b01) begin
+			propUpper = desiredAngle + 256;
+			propLower = desiredAngle - 255;
+			propOverUpper = 0;
+			propOverLower = 1006;
+			if(propUpper > 1006) begin
+				propOverUpper = propUpper - 1006;
+				propUpper = 1006;
+			end
+			else if(propLower < 0) begin
+				propOverLower = propLower + 1006;
+				propLower = 0;
+			end
+			if(currentAngle > desiredAngle && currentAngle < propUpper)
+				pwmDuty = currentAngle - desiredAngle;
+			else if(currentAngle < desiredAngle && currentAngle < propOverUpper)
+				pwmDuty = (8'd255 - propOverUpper) + currentAngle;
+			else if(currentAngle > desiredAngle && currentAngle >= propOverLower)
+				pwmDuty = (currentAngle - propOverLower) + desiredAngle;
+			else if(currentAngle < desiredAngle && currentAngle >= propLower)
+				pwmDuty = 8'd255 - (currentAngle - propLower);
+			else if(currentAngle == desiredAngle)
+				pwmDuty = 8'd0;
+			else
+				pwmDuty = 8'd255;
 		end
-		if(currentAngle > desiredAngle && currentAngle < propUpper)
-			pwmDuty = currentAngle - desiredAngle;
-		else if(currentAngle < desiredAngle && currentAngle < propOverUpper)
-			pwmDuty = (8'd255 - propOverUpper) + currentAngle;
-		else if(currentAngle > desiredAngle && currentAngle >= propOverLower)
-			pwmDuty = (currentAngle - propOverLower) + desiredAngle;
-		else if(currentAngle < desiredAngle && currentAngle >= propLower)
-			pwmDuty = 8'd255 - (currentAngle - propLower);
-		else if(currentAngle == desiredAngle)
-			pwmDuty = 8'd0;
-		else
-			pwmDuty = 8'd255;
 	end
-	if(brake == 0)
-		motor_ctrl = 2'b11;
-	else if(power == 0)
-		motor_ctrl = 2'b00;
-	else if(clockwise == 0)
-		motor_ctrl = 2'b01;
-	else if(clockwise == 1)
-		motor_ctrl = 2'b10;
 	lastCommand = currentCommand;
 end
 
