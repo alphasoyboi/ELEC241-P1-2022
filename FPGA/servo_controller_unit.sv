@@ -1,6 +1,5 @@
 module servo_controller_unit (
-    output logic [7:0] motor_period, motor_duty, 
-    output logic [1:0] motor_ctrl, 
+    output logic [7:0] motor_period, motor_duty,
     output logic [31:0] status_reg,
     output logic atuReset, atuMonitor, clockwise, brake, pwmOn, 
     input logic [31:0] input_reg, 
