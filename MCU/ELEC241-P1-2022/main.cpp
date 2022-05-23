@@ -121,7 +121,7 @@ uint16_t spi_readwrite(uint16_t data) {
 
 uint16_t convert_angle_to_pulses(int angle)
 {
-    return angle * (1006 / 360);
+    return (angle * 1006) / 360;
 }
 
 int convert_pulses_readback_to_angle(uint16_t pulses)
