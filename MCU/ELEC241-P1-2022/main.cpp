@@ -52,7 +52,7 @@ uint16_t spi_readwrite(uint16_t data);
 uint16_t convert_angle_to_pulses(int angle);
 int convert_pulses_readback_to_angle(uint16_t pulses);
 uint16_t create_instr(InstrType type, uint16_t data);
-uint16_t term_read(int current_angle);
+uint16_t term_read(int &desired_angle, int current_angle);
 int parse_cmd_int_arg(const std::string &cmd_buf);
 
 int main() {
@@ -90,15 +90,16 @@ int main() {
     serial_port.write(help_msg.c_str(), help_msg.length());
     while(true)                 
     {    
-        new_instr = term_read(convert_pulses_readback_to_angle(pulses_readback));
-        if (angle != new_angle) { // check if angle has been updated
-            angle = new_angle;
-            pulses_readback = spi_readwrite(create_instr(INSTR_ANGLE, convert_angle_to_pulses(angle)));
-        }
+        // this isn't perfect but i don't have time to make it perfect
+        // it sends two commands if you change the angle in the terminal but it shouldn't
+        new_instr = term_read(new_angle, convert_pulses_readback_to_angle(pulses_readback));
         if (new_instr && (instr != new_instr)) { // check for new valid instruction
             instr = new_instr;
             pulses_readback = spi_readwrite(instr);
-             = convert_pulses_readback_to_angle(pulses_readback);
+        }
+        if (angle != new_angle) { // check if angle has been updated
+            angle = new_angle;
+            pulses_readback = spi_readwrite(create_instr(INSTR_ANGLE, convert_angle_to_pulses(angle)));
         }
     }
 }
@@ -122,7 +123,7 @@ uint16_t spi_readwrite(uint16_t data) {
 
 uint16_t convert_angle_to_pulses(int angle)
 {
-    return (angle * 1006) / 360;
+    return (angle * 1006) / 359;
 }
 
 int convert_pulses_readback_to_angle(uint16_t pulses)
@@ -135,7 +136,7 @@ uint16_t create_instr(InstrType type, uint16_t data)
     return (type << 12) | (data & 0x0FFF);
 }
 
-uint16_t term_read(int current_angle)
+uint16_t term_read(int &desired_angle, int current_angle)
 {
     typedef enum {
         READ_CMD,
@@ -148,6 +149,7 @@ uint16_t term_read(int current_angle)
 
     InstrType instr_type = INSTR_ILLEGAL;
     uint16_t instr_data = 0;
+    bool invalid_arg = false;
 
     switch (state) {
         case READ_CMD: {
@@ -163,23 +165,23 @@ uint16_t term_read(int current_angle)
             }
             break;
         }
-        case PARSE_CMD: { // i think the use of goto is justified... idk
+        case PARSE_CMD: {
             if (buf.find("help") == 0) {
                 serial_port.write(help_msg.c_str(), help_msg.length());
             } 
             else if (buf.find("angle") == 0) {
                 instr_type = INSTR_ANGLE;
-                int angle = parse_cmd_int_arg(buf);
-                if (angle < 0 || angle > 360)
-                    goto INVALID_ARG;
+                desired_angle = parse_cmd_int_arg(buf);
+                if (desired_angle < 0 || desired_angle > 359)
+                    invalid_arg = true;
                 else
-                    instr_data = convert_angle_to_pulses(angle);
+                    instr_data = convert_angle_to_pulses(desired_angle);
             }
             else if (buf.find("period") == 0) {
                 instr_type = INSTR_PWM_PERIOD;
                 int period = parse_cmd_int_arg(buf);
                 if (period < 0 || period > 255)
-                    goto INVALID_ARG;
+                    invalid_arg = true;
                 else
                     instr_data = period;
             }
@@ -190,7 +192,7 @@ uint16_t term_read(int current_angle)
                 else if (buf.find("prop") == 5)
                     instr_data = PROPORTIONAL;
                 else 
-                    goto INVALID_ARG;
+                    invalid_arg = true;
             }
             else if (buf.find("cmd") == 0) {
                 instr_type = INSTR_COMMAND;
@@ -201,7 +203,7 @@ uint16_t term_read(int current_angle)
                 else if (buf.find("brake") == 4)
                     instr_data = BRAKE;
                 else 
-                    goto INVALID_ARG;
+                    invalid_arg = true;
             }
             else if (buf.find("power") == 0) {
                 instr_type = INSTR_PWM_POWER;
@@ -210,7 +212,7 @@ uint16_t term_read(int current_angle)
                 else if (buf.find("off") == 6)
                     instr_data = 1;
                 else 
-                    goto INVALID_ARG;
+                    invalid_arg = true;
             }
             else if (buf.find("status") == 0) {
                 std::string status = "current angle: " + std::to_string(current_angle) + "\n\n";
@@ -220,15 +222,13 @@ uint16_t term_read(int current_angle)
                 serial_port.write(inv_cmd_msg.c_str(), inv_cmd_msg.length());
             }
 
+            if (invalid_arg) {
+                instr_type = INSTR_ILLEGAL;
+                serial_port.write(inv_arg_msg.c_str(), inv_arg_msg.length());
+            }
             buf.erase();
             state = READ_CMD;
             break;
-
-            INVALID_ARG:
-            instr_type = INSTR_ILLEGAL;
-            serial_port.write(inv_arg_msg.c_str(), inv_arg_msg.length());
-            buf.erase();
-            state = READ_CMD;
         }
     }
 

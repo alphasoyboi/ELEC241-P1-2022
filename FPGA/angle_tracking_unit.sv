@@ -31,8 +31,8 @@ always_ff @(posedge clk or negedge n_reset) begin
                 end
             end
 				
-            hall_0_prev = hall_1;
-            hall_1_prev = hall_2;
+            hall_1_prev = hall_1;
+            hall_2_prev = hall_2;
         end
     end
 end
