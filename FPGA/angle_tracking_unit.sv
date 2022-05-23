@@ -15,7 +15,7 @@ always_ff @(posedge hall_2, negedge n_reset) begin
 	else if(clockwise == 1'b1 && monitor == 1'b1) begin
 		if(hall_1 == 1'b1) begin
 			data = starter + 12'd1;
-			//overflow calculator. 4024 is the largest multiple of 1006 in 12 bits
+			//overflow calculator
 			if(data == 12'd1006)
 				data = 12'd0;
 			starter = data;
