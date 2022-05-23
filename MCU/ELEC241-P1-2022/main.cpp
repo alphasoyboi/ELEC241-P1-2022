@@ -98,6 +98,7 @@ int main() {
         if (new_instr && (instr != new_instr)) { // check for new valid instruction
             instr = new_instr;
             pulses_readback = spi_readwrite(instr);
+             = convert_pulses_readback_to_angle(pulses_readback);
         }
     }
 }
@@ -126,7 +127,7 @@ uint16_t convert_angle_to_pulses(int angle)
 
 int convert_pulses_readback_to_angle(uint16_t pulses)
 {
-    return (~(INSTR_READBACK << 12) & pulses) * 360 / 1006;
+    return (~(INSTR_READBACK << 12) & pulses) * 359 / 1006;
 }
 
 uint16_t create_instr(InstrType type, uint16_t data)

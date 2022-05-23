@@ -1,19 +1,18 @@
 module display_controller #(
     // delays in clock pulses
-    parameter int unsigned cycles_40000us = 2000000, // delay for vcc rise
-    parameter int unsigned cycles_2000us  = 100000,  // delay for display clear
-    parameter int unsigned cycles_43us    = 2150,    // delay for data register write
-    parameter int unsigned cycles_39us    = 1950,    // delay for most instruction register writes
-    parameter int unsigned cycles_1200ns  = 60,      // write delay for enable pulse low
-    parameter int unsigned cycles_140ns   = 7        // write delay for enable pulse high
+    parameter int unsigned cycles_100ms  = 5000000, // delay between writing new angle value to lcd
+    parameter int unsigned cycles_40ms   = 2000000, // delay for vcc rise
+    parameter int unsigned cycles_2ms    = 100000,  // delay for display clear
+    parameter int unsigned cycles_43us   = 2150,    // delay for data register write
+    parameter int unsigned cycles_39us   = 1950,    // delay for most instruction register writes
+    parameter int unsigned cycles_1200ns = 60,      // write delay for enable pulse low
+    parameter int unsigned cycles_140ns  = 7        // write delay for enable pulse high
 )   (
     output logic [7:0] data,
     output logic rs,
     output logic rw,
     output logic e,
-    output logic busy,
     input logic [31:0] angle,
-    input logic write,
     input logic clk,
     input logic n_reset
 );
@@ -58,7 +57,7 @@ always_ff @(posedge clk or negedge n_reset) begin
 
         case (state)
             S0: begin // vcc rise
-                if (clk_cnt >= cycles_40000us) begin
+                if (clk_cnt >= cycles_40ms) begin
                     clk_cnt <= 0;
                     state   <= S1;
                 end
@@ -98,7 +97,7 @@ always_ff @(posedge clk or negedge n_reset) begin
                     {e, rs, rw, data} <= {3'b100, CMD_CLR_DISP};
                 else
                     e <= 0;
-                if (clk_cnt >= cycles_2000us + cycles_1200ns) begin
+                if (clk_cnt >= cycles_2ms + cycles_1200ns) begin
                     clk_cnt <= 0;
                     state <= S5;
                 end
@@ -125,7 +124,7 @@ always_ff @(posedge clk or negedge n_reset) begin
                     {e, rs, rw, data} <= {3'b100, CMD_CLR_DISP};
                 else
                     e <= 0;
-                if (clk_cnt >= cycles_2000us + cycles_1200ns) begin
+                if (clk_cnt >= cycles_2ms + cycles_1200ns) begin
                     clk_cnt <= 0;
                     state   <= S8;
                 end
@@ -145,7 +144,7 @@ always_ff @(posedge clk or negedge n_reset) begin
                 end
             end
             S9: begin // pause
-                if (clk_cnt >= 50000000) begin
+                if (clk_cnt >= cycles_100ms) begin
                     clk_cnt <= 0;
                     state   <= S6;
                 end
@@ -159,13 +158,6 @@ always_ff @(posedge clk or negedge n_reset) begin
             end
         endcase
     end
-end
-
-always_comb begin
-    if (state == S6)
-        busy = 0;
-    else
-        busy = 1;
 end
 
 endmodule

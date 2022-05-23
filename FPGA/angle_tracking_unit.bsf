@@ -41,23 +41,30 @@ https://fpgasoftware.intel.com/eula.
 	(port
 		(pt 0 64)
 		(input)
-		(text "reset" (rect 0 0 20 12)(font "Arial" ))
-		(text "reset" (rect 21 59 41 71)(font "Arial" ))
+		(text "monitor" (rect 0 0 29 12)(font "Arial" ))
+		(text "monitor" (rect 21 59 50 71)(font "Arial" ))
 		(line (pt 0 64)(pt 16 64)(line_width 1))
 	)
 	(port
 		(pt 0 80)
 		(input)
-		(text "monitor" (rect 0 0 29 12)(font "Arial" ))
-		(text "monitor" (rect 21 75 50 87)(font "Arial" ))
+		(text "clockwise" (rect 0 0 36 12)(font "Arial" ))
+		(text "clockwise" (rect 21 75 57 87)(font "Arial" ))
 		(line (pt 0 80)(pt 16 80)(line_width 1))
 	)
 	(port
 		(pt 0 96)
 		(input)
-		(text "clockwise" (rect 0 0 36 12)(font "Arial" ))
-		(text "clockwise" (rect 21 91 57 103)(font "Arial" ))
+		(text "clk" (rect 0 0 10 12)(font "Arial" ))
+		(text "clk" (rect 21 91 31 103)(font "Arial" ))
 		(line (pt 0 96)(pt 16 96)(line_width 1))
+	)
+	(port
+		(pt 0 112)
+		(input)
+		(text "n_reset" (rect 0 0 30 12)(font "Arial" ))
+		(text "n_reset" (rect 21 107 51 119)(font "Arial" ))
+		(line (pt 0 112)(pt 16 112)(line_width 1))
 	)
 	(port
 		(pt 184 32)
@@ -66,13 +73,7 @@ https://fpgasoftware.intel.com/eula.
 		(text "angle[11..0]" (rect 121 27 163 39)(font "Arial" ))
 		(line (pt 184 32)(pt 168 32)(line_width 3))
 	)
-	(parameter
-		"N"
-		"000000000000"
-		""
-		(type "PARAMETER_UNSIGNED_BIN")	)
 	(drawing
 		(rectangle (rect 16 16 168 128)(line_width 1))
 	)
-	(annotation_block (parameter)(rect 200 -64 300 16))
 )

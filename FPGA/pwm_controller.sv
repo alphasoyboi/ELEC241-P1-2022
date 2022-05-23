@@ -8,6 +8,13 @@ module pwm_controller(
     input logic n_reset
 );
 
+enum bit [1:0] {
+	MOTOR_OFF   = 2'b00,
+	MOTOR_CW    = 2'b01, // clockwise
+	MOTOR_CCW   = 2'b10, // counter clockwise
+	MOTOR_BRAKE = 2'b11
+} motor_ctrl;
+
 int unsigned clk_cnt, period_in_cycles, duty_in_cycles;
 
 always_comb begin
@@ -22,10 +29,10 @@ always_ff @(posedge clk or negedge n_reset) begin
         clk_cnt <= clk_cnt + 1;
 
         case (ctrl)
-            2'b00: begin
+            MOTOR_OFF: begin
                 {motor_a, motor_b} <= 2'b00;
             end
-            2'b01: begin
+            MOTOR_CW: begin
                 if (clk_cnt <= duty_in_cycles)
                     {motor_a, motor_b} <= 2'b10;
                 else
@@ -33,7 +40,7 @@ always_ff @(posedge clk or negedge n_reset) begin
                 if (clk_cnt > period_in_cycles)
                     clk_cnt <= 0;
             end
-            2'b10: begin
+            MOTOR_CCW: begin
                 if (clk_cnt <= duty_in_cycles)
                     {motor_a, motor_b} <= 2'b01;
                 else
@@ -41,7 +48,7 @@ always_ff @(posedge clk or negedge n_reset) begin
                 if (clk_cnt > period_in_cycles)
                     clk_cnt <= 0;
             end
-            2'b11: begin
+            MOTOR_BRAKE: begin
                 {motor_a, motor_b} <= 2'b11;
             end
         endcase
