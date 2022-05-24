@@ -12,35 +12,39 @@ always_comb begin
     duty_in_cycles = duty * period_in_cycles / 255;
 end
 
-always_ff @(posedge clk, negedge n_reset, negedge brake) begin
+always @(posedge clk or negedge n_reset) begin
     if (~n_reset)
         clk_cnt <= 0;
     else begin
         clk_cnt <= clk_cnt + 1;
 
-        if(brake == 1'b0) begin
+        if(brake == 1'b1) begin
             {motor_a, motor_b} <= 2'b11;
             clk_cnt <= 0;
         end
-        else if(power == 1'b0) begin
-            {motor_a, motor_b} <= 2'b00;
-            clk_cnt <= 0;
-        end
-        else if(clockwise == 1'b0) begin
-                if (clk_cnt <= duty_in_cycles)
-                    {motor_a, motor_b} <= 2'b10;
-                else
-                    {motor_a, motor_b} <= 2'b00;
-                if (clk_cnt > period_in_cycles)
-                    clk_cnt <= 0;
-        end
-        else if(clockwise == 1'b1) begin
-            if (clk_cnt <= duty_in_cycles)
-                {motor_a, motor_b} <= 2'b01;
-            else
+        else begin
+            if(power == 1'b0) begin
                 {motor_a, motor_b} <= 2'b00;
-            if (clk_cnt > period_in_cycles)
                 clk_cnt <= 0;
+            end
+            else begin
+                if(clockwise == 1'b0) begin
+                        if (clk_cnt <= duty_in_cycles)
+                            {motor_a, motor_b} <= 2'b10;
+                        else
+                            {motor_a, motor_b} <= 2'b00;
+                        if (clk_cnt > period_in_cycles)
+                            clk_cnt <= 0;
+                end
+                else begin
+                    if (clk_cnt <= duty_in_cycles)
+                        {motor_a, motor_b} <= 2'b01;
+                    else
+                        {motor_a, motor_b} <= 2'b00;
+                    if (clk_cnt > period_in_cycles)
+                        clk_cnt <= 0;
+                end
+            end
         end
     end
 end

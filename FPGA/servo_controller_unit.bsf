@@ -34,8 +34,8 @@ https://fpgasoftware.intel.com/eula.
 	(port
 		(pt 0 48)
 		(input)
-		(text "currentAngle[11..0]" (rect 0 0 74 12)(font "Arial" ))
-		(text "currentAngle[11..0]" (rect 21 43 95 55)(font "Arial" ))
+		(text "current_angle[11..0]" (rect 0 0 76 12)(font "Arial" ))
+		(text "current_angle[11..0]" (rect 21 43 97 55)(font "Arial" ))
 		(line (pt 0 48)(pt 16 48)(line_width 3))
 	)
 	(port
@@ -55,15 +55,15 @@ https://fpgasoftware.intel.com/eula.
 	(port
 		(pt 248 32)
 		(output)
-		(text "motor_period[7..0]" (rect 0 0 73 12)(font "Arial" ))
-		(text "motor_period[7..0]" (rect 154 27 227 39)(font "Arial" ))
+		(text "pwm_period[7..0]" (rect 0 0 68 12)(font "Arial" ))
+		(text "pwm_period[7..0]" (rect 159 27 227 39)(font "Arial" ))
 		(line (pt 248 32)(pt 232 32)(line_width 3))
 	)
 	(port
 		(pt 248 48)
 		(output)
-		(text "motor_duty[7..0]" (rect 0 0 67 12)(font "Arial" ))
-		(text "motor_duty[7..0]" (rect 160 43 227 55)(font "Arial" ))
+		(text "pwm_duty[7..0]" (rect 0 0 62 12)(font "Arial" ))
+		(text "pwm_duty[7..0]" (rect 165 43 227 55)(font "Arial" ))
 		(line (pt 248 48)(pt 232 48)(line_width 3))
 	)
 	(port
@@ -76,15 +76,15 @@ https://fpgasoftware.intel.com/eula.
 	(port
 		(pt 248 80)
 		(output)
-		(text "atuReset" (rect 0 0 36 12)(font "Arial" ))
-		(text "atuReset" (rect 191 75 227 87)(font "Arial" ))
+		(text "atu_reset" (rect 0 0 37 12)(font "Arial" ))
+		(text "atu_reset" (rect 190 75 227 87)(font "Arial" ))
 		(line (pt 248 80)(pt 232 80)(line_width 1))
 	)
 	(port
 		(pt 248 96)
 		(output)
-		(text "atuMonitor" (rect 0 0 41 12)(font "Arial" ))
-		(text "atuMonitor" (rect 186 91 227 103)(font "Arial" ))
+		(text "atu_monitor" (rect 0 0 47 12)(font "Arial" ))
+		(text "atu_monitor" (rect 180 91 227 103)(font "Arial" ))
 		(line (pt 248 96)(pt 232 96)(line_width 1))
 	)
 	(port
@@ -97,15 +97,15 @@ https://fpgasoftware.intel.com/eula.
 	(port
 		(pt 248 128)
 		(output)
-		(text "brake" (rect 0 0 22 12)(font "Arial" ))
-		(text "brake" (rect 205 123 227 135)(font "Arial" ))
+		(text "pwm_brake" (rect 0 0 47 12)(font "Arial" ))
+		(text "pwm_brake" (rect 180 123 227 135)(font "Arial" ))
 		(line (pt 248 128)(pt 232 128)(line_width 1))
 	)
 	(port
 		(pt 248 144)
 		(output)
-		(text "pwmOn" (rect 0 0 30 12)(font "Arial" ))
-		(text "pwmOn" (rect 197 139 227 151)(font "Arial" ))
+		(text "pwm_power" (rect 0 0 48 12)(font "Arial" ))
+		(text "pwm_power" (rect 179 139 227 151)(font "Arial" ))
 		(line (pt 248 144)(pt 232 144)(line_width 1))
 	)
 	(drawing
