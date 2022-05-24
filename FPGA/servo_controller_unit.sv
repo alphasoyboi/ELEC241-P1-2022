@@ -34,9 +34,9 @@ always_ff @(posedge clk) begin
 		controlMode = inputInternal[28:27];
 		power = inputInternal[31];
 		if(currentCommand == 2'b10 || currentCommand == 2'b11)
-			pwm_brake = 0;
-		else
 			pwm_brake = 1;
+		else
+			pwm_brake = 0;
 		if(currentCommand == 2'b01) begin
 			for(int i = 0; i < 0; i++) begin
 				if(i == 0)
