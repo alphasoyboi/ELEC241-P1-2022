@@ -18,14 +18,14 @@ always_ff @(posedge clk, negedge n_reset, negedge brake) begin
     else begin
         clk_cnt <= clk_cnt + 1;
 
-	if(brake == 1'b0) begin
-                {motor_a, motor_b} <= 2'b11;
-		clk_cnt <= 0;
-	end
-	else if(power == 1'b0) begin
-                {motor_a, motor_b} <= 2'b00;
-		clk_cnt <= 0;
-	end
+        if(brake == 1'b0) begin
+            {motor_a, motor_b} <= 2'b11;
+            clk_cnt <= 0;
+        end
+        else if(power == 1'b0) begin
+            {motor_a, motor_b} <= 2'b00;
+            clk_cnt <= 0;
+        end
         else if(clockwise == 1'b0) begin
                 if (clk_cnt <= duty_in_cycles)
                     {motor_a, motor_b} <= 2'b10;
@@ -34,13 +34,13 @@ always_ff @(posedge clk, negedge n_reset, negedge brake) begin
                 if (clk_cnt > period_in_cycles)
                     clk_cnt <= 0;
         end
-	else if(clockwise == 1'b1) begin
-                if (clk_cnt <= duty_in_cycles)
-                    {motor_a, motor_b} <= 2'b01;
-                else
-                    {motor_a, motor_b} <= 2'b00;
-                if (clk_cnt > period_in_cycles)
-                    clk_cnt <= 0;
+        else if(clockwise == 1'b1) begin
+            if (clk_cnt <= duty_in_cycles)
+                {motor_a, motor_b} <= 2'b01;
+            else
+                {motor_a, motor_b} <= 2'b00;
+            if (clk_cnt > period_in_cycles)
+                clk_cnt <= 0;
         end
     end
 end

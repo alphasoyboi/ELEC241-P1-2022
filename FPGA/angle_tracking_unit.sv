@@ -9,6 +9,7 @@ bit hall_1_prev, hall_2_prev;
 
 always_ff @(posedge clk or negedge n_reset) begin
     if (~n_reset) begin
+        angle <= 0;
         hall_1_prev <= hall_1;
         hall_2_prev <= hall_2;
     end
