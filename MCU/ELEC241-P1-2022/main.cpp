@@ -210,9 +210,9 @@ uint16_t term_read(int &desired_angle, int current_angle)
             else if (buf.find("power") == 0) {
                 instr_type = INSTR_PWM_POWER;
                 if (buf.find("on") == 6)
-                    instr_data = 0;
-                else if (buf.find("off") == 6)
                     instr_data = 1;
+                else if (buf.find("off") == 6)
+                    instr_data = 0;
                 else 
                     invalid_arg = true;
             }
