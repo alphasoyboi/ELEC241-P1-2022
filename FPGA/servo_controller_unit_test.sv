@@ -30,7 +30,6 @@ bit atu_reset_triggered = 1;
 
 assign atu_monitor = 1;
 assign status_reg = current_angle;
-assign desired_angle = input_reg[11:0];
 
 always_ff @(posedge clk or negedge n_reset) begin
     if (~n_reset) begin
@@ -48,8 +47,8 @@ always_ff @(posedge clk or negedge n_reset) begin
     else begin
         
         current_cmd <= input_reg[30:29];
-        //if(current_cmd == CMD_CONTINUOUS || current_cmd != last_cmd) begin
-            //desired_angle = input_reg[11:0];
+        if(current_cmd == CMD_CONTINUOUS || current_cmd != last_cmd) begin
+            desired_angle = input_reg[11:0];
             pwm_period <= input_reg[19:12];
             ctrl_mode <= input_reg[28:27];
             pwm_power <= input_reg[31];
