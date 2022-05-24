@@ -24,11 +24,9 @@ bit [1:0] ctrl_mode;
 bit [1:0] current_cmd, last_cmd; 
 int clockwise_bounds, overflow_bounds;
 int prop_upper, prop_lower, prop_over_upper, prop_over_lower;
+bit atu_reset_triggered = 1;
 
-assign pwm_period = 20;
-assign pwm_brake  = 0;
-assign pwm_power  = 1;
-assign atu_reset = 1;
+
 
 assign atu_monitor = 1;
 assign status_reg = current_angle;
@@ -36,20 +34,21 @@ assign desired_angle = input_reg[11:0];
 
 always_ff @(posedge clk or negedge n_reset) begin
     if (~n_reset) begin
-        //pwm_duty   <= 0;
-        //pwm_period <= 20;
-        //pwm_brake  <= 0;
-        //pwm_power  <= 1;
+        pwm_duty   <= 0;
+        pwm_period <= 20;
+        pwm_brake  <= 0;
+        pwm_power  <= 1;
 
-        //atu_reset <= 1;
+        atu_reset <= 1;
+        atu_reset_triggered <= 1;
 
         clockwise  <= 1;
+        ctrl_mode <= CTRL_BANG_BANG;
     end
     else begin
-        ctrl_mode <= input_reg[28:27];
-        /*
-        current_cmd = input_reg[30:29];
-        if(current_cmd == CMD_CONTINUOUS || current_cmd != last_cmd) begin
+        
+        current_cmd <= input_reg[30:29];
+        //if(current_cmd == CMD_CONTINUOUS || current_cmd != last_cmd) begin
             //desired_angle = input_reg[11:0];
             pwm_period <= input_reg[19:12];
             ctrl_mode <= input_reg[28:27];
@@ -59,16 +58,19 @@ always_ff @(posedge clk or negedge n_reset) begin
             else
                 pwm_brake <= 0;
             if(current_cmd == CMD_RESET) begin
-                for(int i = 0; i < 0; i++) begin
-                    if(i == 0)
-                        atu_reset <= 0;
-                    else
-                        atu_reset <= 1;
+                if(atu_reset_triggered == 0) begin
+                    atu_reset <= 0;
+                    atu_reset_triggered <= 1;
                 end
+                else
+                    atu_reset <= 1;
             end
-        end
+            else begin
+                atu_reset_triggered <= 1;
+                atu_reset <= 1;
+            end
+        //end
         last_cmd <= current_cmd;
-        */
 
         if (current_angle != desired_angle) begin
             clockwise_bounds <= desired_angle + 503;
