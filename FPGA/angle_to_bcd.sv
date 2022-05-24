@@ -3,7 +3,7 @@ module angle_to_bcd (output logic [11:0] bcd, input logic [11:0] angle);
     int unsigned deg, i;
     bit [8:0] bin;
     always_comb begin
-        deg = (359 * angle) / 1006;
+        deg = (359 * angle) / 1005;
         bin = deg;
         bcd = 0;
 

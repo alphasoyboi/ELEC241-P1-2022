@@ -1,0 +1,114 @@
+/*
+WARNING: Do NOT edit the input and output ports in this file in a text
+editor if you plan to continue editing the block that represents it in
+the Block Editor! File corruption is VERY likely to occur.
+*/
+/*
+Copyright (C) 2020  Intel Corporation. All rights reserved.
+Your use of Intel Corporation's design tools, logic functions 
+and other software and tools, and any partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Intel Program License 
+Subscription Agreement, the Intel Quartus Prime License Agreement,
+the Intel FPGA IP License Agreement, or other applicable license
+agreement, including, without limitation, that your use is for
+the sole purpose of programming logic devices manufactured by
+Intel and sold by Intel or its authorized distributors.  Please
+refer to the applicable agreement for further details, at
+https://fpgasoftware.intel.com/eula.
+*/
+(header "symbol" (version "1.1"))
+(symbol
+	(rect 16 16 264 192)
+	(text "servo_controller_unit_test" (rect 5 0 108 12)(font "Arial" ))
+	(text "inst" (rect 8 160 20 172)(font "Arial" ))
+	(port
+		(pt 0 32)
+		(input)
+		(text "input_reg[31..0]" (rect 0 0 60 12)(font "Arial" ))
+		(text "input_reg[31..0]" (rect 21 27 81 39)(font "Arial" ))
+		(line (pt 0 32)(pt 16 32)(line_width 3))
+	)
+	(port
+		(pt 0 48)
+		(input)
+		(text "current_angle[11..0]" (rect 0 0 76 12)(font "Arial" ))
+		(text "current_angle[11..0]" (rect 21 43 97 55)(font "Arial" ))
+		(line (pt 0 48)(pt 16 48)(line_width 3))
+	)
+	(port
+		(pt 0 64)
+		(input)
+		(text "clk" (rect 0 0 10 12)(font "Arial" ))
+		(text "clk" (rect 21 59 31 71)(font "Arial" ))
+		(line (pt 0 64)(pt 16 64)(line_width 1))
+	)
+	(port
+		(pt 0 80)
+		(input)
+		(text "n_reset" (rect 0 0 30 12)(font "Arial" ))
+		(text "n_reset" (rect 21 75 51 87)(font "Arial" ))
+		(line (pt 0 80)(pt 16 80)(line_width 1))
+	)
+	(port
+		(pt 248 32)
+		(output)
+		(text "status_reg[31..0]" (rect 0 0 66 12)(font "Arial" ))
+		(text "status_reg[31..0]" (rect 161 27 227 39)(font "Arial" ))
+		(line (pt 248 32)(pt 232 32)(line_width 3))
+	)
+	(port
+		(pt 248 48)
+		(output)
+		(text "pwm_period[7..0]" (rect 0 0 68 12)(font "Arial" ))
+		(text "pwm_period[7..0]" (rect 159 43 227 55)(font "Arial" ))
+		(line (pt 248 48)(pt 232 48)(line_width 3))
+	)
+	(port
+		(pt 248 64)
+		(output)
+		(text "pwm_duty[7..0]" (rect 0 0 62 12)(font "Arial" ))
+		(text "pwm_duty[7..0]" (rect 165 59 227 71)(font "Arial" ))
+		(line (pt 248 64)(pt 232 64)(line_width 3))
+	)
+	(port
+		(pt 248 80)
+		(output)
+		(text "pwm_brake" (rect 0 0 47 12)(font "Arial" ))
+		(text "pwm_brake" (rect 180 75 227 87)(font "Arial" ))
+		(line (pt 248 80)(pt 232 80)(line_width 1))
+	)
+	(port
+		(pt 248 96)
+		(output)
+		(text "pwm_power" (rect 0 0 48 12)(font "Arial" ))
+		(text "pwm_power" (rect 179 91 227 103)(font "Arial" ))
+		(line (pt 248 96)(pt 232 96)(line_width 1))
+	)
+	(port
+		(pt 248 112)
+		(output)
+		(text "clockwise" (rect 0 0 36 12)(font "Arial" ))
+		(text "clockwise" (rect 191 107 227 119)(font "Arial" ))
+		(line (pt 248 112)(pt 232 112)(line_width 1))
+	)
+	(port
+		(pt 248 128)
+		(output)
+		(text "atu_reset" (rect 0 0 37 12)(font "Arial" ))
+		(text "atu_reset" (rect 190 123 227 135)(font "Arial" ))
+		(line (pt 248 128)(pt 232 128)(line_width 1))
+	)
+	(port
+		(pt 248 144)
+		(output)
+		(text "atu_monitor" (rect 0 0 47 12)(font "Arial" ))
+		(text "atu_monitor" (rect 180 139 227 151)(font "Arial" ))
+		(line (pt 248 144)(pt 232 144)(line_width 1))
+	)
+	(drawing
+		(rectangle (rect 16 16 232 160)(line_width 1))
+	)
+)

@@ -73,7 +73,13 @@ https://fpgasoftware.intel.com/eula.
 		(text "angle[11..0]" (rect 121 27 163 39)(font "Arial" ))
 		(line (pt 184 32)(pt 168 32)(line_width 3))
 	)
+	(parameter
+		"cycles_debounce"
+		"00000000000000000000000111110100"
+		""
+		(type "PARAMETER_UNSIGNED_BIN")	)
 	(drawing
 		(rectangle (rect 16 16 168 128)(line_width 1))
 	)
+	(annotation_block (parameter)(rect 200 -64 300 16))
 )

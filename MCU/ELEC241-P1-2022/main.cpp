@@ -123,12 +123,12 @@ uint16_t spi_readwrite(uint16_t data) {
 
 uint16_t convert_angle_to_pulses(int angle)
 {
-    return (angle * 1006) / 359;
+    return (angle * 1005) / 359;
 }
 
 int convert_pulses_readback_to_angle(uint16_t pulses)
 {
-    return (~(INSTR_READBACK << 12) & pulses) * 359 / 1006;
+    return (~(INSTR_READBACK << 12) & pulses) * 359 / 1005;
 }
 
 uint16_t create_instr(InstrType type, uint16_t data)

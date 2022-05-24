@@ -17,7 +17,7 @@ always_ff @(posedge clk or negedge n_reset) begin
         if (monitor) begin
             if (clockwise) begin
                 if ((hall_1 == 1 && hall_1_prev == 1) && hall_2 != hall_2_prev) begin
-                    if (angle > 1006)
+                    if (angle > 1005)
                         angle <= 0;
                     else
                         angle <= angle + 1;
@@ -26,7 +26,7 @@ always_ff @(posedge clk or negedge n_reset) begin
             else begin
                 if ((hall_2 == 1 && hall_2_prev == 1) && hall_1 != hall_1_prev) begin
                     if (angle == 0)
-                        angle <= 1006;
+                        angle <= 1005;
                     else 
                         angle <= angle - 1;
                 end
