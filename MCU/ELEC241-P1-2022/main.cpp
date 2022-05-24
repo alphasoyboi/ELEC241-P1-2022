@@ -78,13 +78,13 @@ int main() {
     // assign interrupts
     button_a.rise([&new_angle](){
         ++new_angle;
-        if (new_angle > 360)
+        if (new_angle > 359)
             new_angle = 0;
     });
     button_b.rise([&new_angle](){
         --new_angle;
         if (new_angle < 0)
-            new_angle = 360;
+            new_angle = 359;
     });
 
     serial_port.write(help_msg.c_str(), help_msg.length());

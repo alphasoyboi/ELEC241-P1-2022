@@ -1,7 +1,8 @@
 module servo_controller_unit (
-    output logic [7:0] pwm_period, pwm_duty,
     output logic [31:0] status_reg,
-    output logic atu_reset, atu_monitor, clockwise, pwm_brake, pwm_power, 
+    output logic [7:0] pwm_period, pwm_duty,
+	 output logic pwm_brake, pwm_power, clockwise,
+    output logic atu_reset, atu_monitor, 
     input logic [31:0] input_reg, 
     input logic [11:0] current_angle, 
     input logic clk, n_reset

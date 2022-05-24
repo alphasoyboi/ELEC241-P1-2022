@@ -1,4 +1,4 @@
-module angle_tracking_unit (
+module angle_tracking_unit #(int unsigned cycles_debounce = 500) (
     output logic [11:0] angle, 
     input logic hall_1, hall_2, monitor, clockwise, 
     input logic clk, n_reset

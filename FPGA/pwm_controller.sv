@@ -1,8 +1,8 @@
 module pwm_controller(
     output logic motor_a, motor_b, 
     input logic [7:0] period,
-	input logic [7:0] duty, 
-    input logic clockwise, brake, power, clk, n_reset
+	 input logic [7:0] duty, 
+    input logic brake, power, clockwise, clk, n_reset
 );
 
 int unsigned clk_cnt, period_in_cycles, duty_in_cycles;

@@ -41,22 +41,22 @@ https://fpgasoftware.intel.com/eula.
 	(port
 		(pt 0 64)
 		(input)
-		(text "clockwise" (rect 0 0 36 12)(font "Arial" ))
-		(text "clockwise" (rect 21 59 57 71)(font "Arial" ))
+		(text "brake" (rect 0 0 22 12)(font "Arial" ))
+		(text "brake" (rect 21 59 43 71)(font "Arial" ))
 		(line (pt 0 64)(pt 16 64)(line_width 1))
 	)
 	(port
 		(pt 0 80)
 		(input)
-		(text "brake" (rect 0 0 22 12)(font "Arial" ))
-		(text "brake" (rect 21 75 43 87)(font "Arial" ))
+		(text "power" (rect 0 0 23 12)(font "Arial" ))
+		(text "power" (rect 21 75 44 87)(font "Arial" ))
 		(line (pt 0 80)(pt 16 80)(line_width 1))
 	)
 	(port
 		(pt 0 96)
 		(input)
-		(text "power" (rect 0 0 23 12)(font "Arial" ))
-		(text "power" (rect 21 91 44 103)(font "Arial" ))
+		(text "clockwise" (rect 0 0 36 12)(font "Arial" ))
+		(text "clockwise" (rect 21 91 57 103)(font "Arial" ))
 		(line (pt 0 96)(pt 16 96)(line_width 1))
 	)
 	(port
