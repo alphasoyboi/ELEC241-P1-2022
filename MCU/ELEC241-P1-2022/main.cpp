@@ -171,11 +171,13 @@ uint16_t term_read(int &desired_angle, int current_angle)
             } 
             else if (buf.find("angle") == 0) {
                 instr_type = INSTR_ANGLE;
-                desired_angle = parse_cmd_int_arg(buf);
-                if (desired_angle < 0 || desired_angle > 359)
+                int angle = parse_cmd_int_arg(buf);
+                if (angle < 0 || angle > 359)
                     invalid_arg = true;
-                else
+                else {
                     instr_data = convert_angle_to_pulses(desired_angle);
+                    desired_angle = angle;
+                }
             }
             else if (buf.find("period") == 0) {
                 instr_type = INSTR_PWM_PERIOD;

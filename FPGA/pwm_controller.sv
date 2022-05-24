@@ -12,23 +12,23 @@ always_comb begin
     duty_in_cycles = duty * period_in_cycles / 255;
 end
 
-always @(posedge clk or negedge n_reset) begin
+always_ff @(posedge clk or negedge n_reset) begin
     if (~n_reset)
         clk_cnt <= 0;
     else begin
         clk_cnt <= clk_cnt + 1;
 
-        if(brake == 1'b1) begin
+        if(brake) begin
             {motor_a, motor_b} <= 2'b11;
             clk_cnt <= 0;
         end
         else begin
-            if(power == 1'b0) begin
+            if(~power) begin
                 {motor_a, motor_b} <= 2'b00;
                 clk_cnt <= 0;
             end
             else begin
-                if(clockwise == 1'b0) begin
+                if(clockwise) begin
                         if (clk_cnt <= duty_in_cycles)
                             {motor_a, motor_b} <= 2'b10;
                         else

@@ -1211,7 +1211,7 @@ https://fpgasoftware.intel.com/eula.
 	(annotation_block (parameter)(rect -408 656 0 800))
 )
 (symbol
-	(rect 360 -112 536 64)
+	(rect 320 -88 496 88)
 	(text "pwm_controller" (rect 5 0 78 12)(font "Arial" ))
 	(text "inst7" (rect 8 160 31 172)(font "Arial" ))
 	(port
@@ -1345,7 +1345,7 @@ https://fpgasoftware.intel.com/eula.
 	(annotation_block (parameter)(rect -192 136 144 176))
 )
 (symbol
-	(rect -80 -128 168 48)
+	(rect -56 -104 192 72)
 	(text "servo_controller_unit_test" (rect 5 0 132 12)(font "Arial" ))
 	(text "inst14" (rect 8 160 36 177)(font "Intel Clear" ))
 	(port
@@ -1780,16 +1780,6 @@ https://fpgasoftware.intel.com/eula.
 	(bus)
 )
 (connector
-	(text "motor_a" (rect 546 -96 586 -79)(font "Intel Clear" ))
-	(pt 536 -80)
-	(pt 592 -80)
-)
-(connector
-	(text "motor_b" (rect 546 -80 586 -63)(font "Intel Clear" ))
-	(pt 536 -64)
-	(pt 592 -64)
-)
-(connector
 	(text "CLOCK_50" (rect 1266 360 1319 377)(font "Intel Clear" ))
 	(pt 1344 376)
 	(pt 1256 376)
@@ -1910,75 +1900,85 @@ https://fpgasoftware.intel.com/eula.
 	(bus)
 )
 (connector
-	(text "input_reg[31..0]" (rect -158 -112 -84 -95)(font "Intel Clear" ))
-	(pt -168 -96)
-	(pt -80 -96)
+	(text "input_reg[31..0]" (rect -134 -88 -60 -71)(font "Intel Clear" ))
+	(pt -144 -72)
+	(pt -56 -72)
 	(bus)
 )
 (connector
-	(text "areset" (rect -134 -64 -105 -47)(font "Intel Clear" ))
-	(pt -144 -48)
-	(pt -80 -48)
+	(text "areset" (rect -110 -40 -81 -23)(font "Intel Clear" ))
+	(pt -120 -24)
+	(pt -56 -24)
 )
 (connector
-	(text "CLOCK_50" (rect -134 -80 -81 -63)(font "Intel Clear" ))
-	(pt -144 -64)
-	(pt -80 -64)
+	(text "CLOCK_50" (rect -110 -56 -57 -39)(font "Intel Clear" ))
+	(pt -120 -40)
+	(pt -56 -40)
 )
 (connector
-	(text "current_angle[11..0]" (rect -158 -96 -63 -79)(font "Intel Clear" ))
-	(pt -168 -80)
-	(pt -80 -80)
+	(text "current_angle[11..0]" (rect -134 -72 -39 -55)(font "Intel Clear" ))
+	(pt -144 -56)
+	(pt -56 -56)
 	(bus)
 )
 (connector
-	(pt 168 -64)
-	(pt 360 -64)
+	(text "atu_monitor" (rect 192 24 249 41)(font "Intel Clear" ))
+	(pt 192 40)
+	(pt 240 40)
+)
+(connector
+	(text "atu_reset" (rect 202 8 246 25)(font "Intel Clear" ))
+	(pt 192 24)
+	(pt 240 24)
+)
+(connector
+	(text "status_reg[31..0]" (rect 192 -88 271 -71)(font "Intel Clear" ))
+	(pt 264 -72)
+	(pt 192 -72)
 	(bus)
 )
 (connector
-	(pt 168 -80)
-	(pt 360 -80)
+	(text "areset" (rect 274 24 303 41)(font "Intel Clear" ))
+	(pt 264 40)
+	(pt 320 40)
+)
+(connector
+	(text "CLOCK_50" (rect 272 8 325 25)(font "Intel Clear" ))
+	(pt 264 24)
+	(pt 320 24)
+)
+(connector
+	(pt 192 -40)
+	(pt 320 -40)
 	(bus)
 )
 (connector
-	(text "atu_monitor" (rect 168 0 225 17)(font "Intel Clear" ))
-	(pt 168 16)
-	(pt 216 16)
-)
-(connector
-	(text "atu_reset" (rect 178 -16 222 1)(font "Intel Clear" ))
-	(pt 168 0)
-	(pt 216 0)
-)
-(connector
-	(text "clockwise" (rect 178 -32 224 -15)(font "Intel Clear" ))
-	(pt 360 -16)
-	(pt 168 -16)
-)
-(connector
-	(pt 360 -32)
-	(pt 168 -32)
-)
-(connector
-	(pt 168 -48)
-	(pt 360 -48)
-)
-(connector
-	(text "areset" (rect 314 0 343 17)(font "Intel Clear" ))
-	(pt 304 16)
-	(pt 360 16)
-)
-(connector
-	(text "CLOCK_50" (rect 312 -16 365 1)(font "Intel Clear" ))
-	(pt 304 0)
-	(pt 360 0)
-)
-(connector
-	(text "status_reg[31..0]" (rect 168 -112 247 -95)(font "Intel Clear" ))
-	(pt 240 -96)
-	(pt 168 -96)
+	(pt 192 -56)
+	(pt 320 -56)
 	(bus)
+)
+(connector
+	(text "clockwise" (rect 202 -8 248 9)(font "Intel Clear" ))
+	(pt 192 8)
+	(pt 320 8)
+)
+(connector
+	(pt 192 -8)
+	(pt 320 -8)
+)
+(connector
+	(pt 192 -24)
+	(pt 320 -24)
+)
+(connector
+	(text "motor_a" (rect 506 -72 546 -55)(font "Intel Clear" ))
+	(pt 496 -56)
+	(pt 552 -56)
+)
+(connector
+	(text "motor_b" (rect 506 -56 546 -39)(font "Intel Clear" ))
+	(pt 496 -40)
+	(pt 552 -40)
 )
 (junction (pt 680 696))
 (junction (pt 664 728))

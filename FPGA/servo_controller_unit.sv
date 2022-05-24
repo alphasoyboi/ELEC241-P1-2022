@@ -53,44 +53,45 @@ always_ff @(posedge clk) begin
 		overflowBounds = clockwiseBounds - 1006;
 		clockwiseBounds = 1006;
 	end
-	else begin
-		if((current_angle > desiredAngle && current_angle < clockwiseBounds) || (current_angle < desiredAngle && current_angle < overflowBounds))
-			clockwise = 0;
+	
+	if((current_angle > desiredAngle && current_angle < clockwiseBounds) || (current_angle < desiredAngle && current_angle < overflowBounds))
+		clockwise = 0;
+	else
+		clockwise = 1;
+	if(controlMode == 2'b00) begin
+		if(current_angle == desiredAngle)
+			pwmDuty = 8'd0;
 		else
-			clockwise = 1;
-		if(controlMode == 2'b00) begin
-			if(current_angle == desiredAngle)
-				pwmDuty = 8'd0;
-			else
-				pwmDuty = 8'd255;
-		end
-		else if(controlMode == 2'b01) begin
-			propUpper = desiredAngle + 256;
-			propLower = desiredAngle - 255;
-			propOverUpper = 0;
-			propOverLower = 1006;
-			if(propUpper > 1006) begin
-				propOverUpper = propUpper - 1006;
-				propUpper = 1006;
-			end
-			else if(propLower < 0) begin
-				propOverLower = propLower + 1006;
-				propLower = 0;
-			end
-			if(current_angle > desiredAngle && current_angle < propUpper)
-				pwmDuty = current_angle - desiredAngle;
-			else if(current_angle < desiredAngle && current_angle < propOverUpper)
-				pwmDuty = (8'd255 - propOverUpper) + current_angle;
-			else if(current_angle > desiredAngle && current_angle >= propOverLower)
-				pwmDuty = (current_angle - propOverLower) + desiredAngle;
-			else if(current_angle < desiredAngle && current_angle >= propLower)
-				pwmDuty = 8'd255 - (current_angle - propLower);
-			else if(current_angle == desiredAngle)
-				pwmDuty = 8'd0;
-			else
-				pwmDuty = 8'd255;
-		end
+			pwmDuty = 8'd255;
 	end
+	
+	else if(controlMode == 2'b01) begin
+		propUpper = desiredAngle + 256;
+		propLower = desiredAngle - 255;
+		propOverUpper = 0;
+		propOverLower = 1006;
+		if(propUpper > 1006) begin
+			propOverUpper = propUpper - 1006;
+			propUpper = 1006;
+		end
+		else if(propLower < 0) begin
+			propOverLower = propLower + 1006;
+			propLower = 0;
+		end
+		if(current_angle > desiredAngle && current_angle < propUpper)
+			pwmDuty = current_angle - desiredAngle;
+		else if(current_angle < desiredAngle && current_angle < propOverUpper)
+			pwmDuty = (8'd255 - propOverUpper) + current_angle;
+		else if(current_angle > desiredAngle && current_angle >= propOverLower)
+			pwmDuty = (current_angle - propOverLower) + desiredAngle;
+		else if(current_angle < desiredAngle && current_angle >= propLower)
+			pwmDuty = 8'd255 - (current_angle - propLower);
+		else if(current_angle == desiredAngle)
+			pwmDuty = 8'd0;
+		else
+			pwmDuty = 8'd255;
+	end
+	
 	lastCommand = currentCommand;
 end
 
