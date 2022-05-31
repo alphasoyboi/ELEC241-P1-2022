@@ -65,10 +65,10 @@ always_ff @(posedge clk or negedge n_reset) begin
                     atu_reset <= 1;
             end
             else begin
-                atu_reset_triggered <= 1;
+                atu_reset_triggered <= 0;
                 atu_reset <= 1;
             end
-        //end
+        end
         last_cmd <= current_cmd;
 
         if (current_angle != desired_angle) begin
